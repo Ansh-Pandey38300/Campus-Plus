@@ -1,0 +1,20 @@
+/* Shared styles (shared file: ask the team leader before changing) */
+:root {
+  --navy: #1f3a5f;
+  --light: #eaf0f8;
+  --text: #222222;
+  --ok: #2e7d4f;
+  --error: #b23a3a;
+}
+* { box-sizing: border-box; }
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--text);
+  margin: 0;
+  padding: 24px;
+  max-width: 960px;
+  margin-inline: auto;
+}
+h1, h2 { color: var(--navy); }
+button { background: var(--navy); color: #fff; border: 0; padding: 8px 14px; border-radius: 4px; cursor: pointer; }
+.card { background: var(--light); padding: 16px; border-radius: 6px; margin: 12px 0; }

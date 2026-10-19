@@ -1,0 +1,5 @@
+-- Master data
+-- Owner: (to be assigned)
+-- Tables: departments, categories (with parent_id), pickup_locations
+-- Rules: plural lowercase table names, id as primary key, created_at on every table,
+--        DECIMAL(10,2) for money, DATETIME for dates. Only the owner edits this file.
