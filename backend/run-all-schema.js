@@ -6,8 +6,9 @@ const path = require('path');
 const db = require('./db');
 
 const schemaDir = path.join(__dirname, '..', 'database', 'schema');
+const seedDir = path.join(__dirname, '..', 'database', 'seed');
 
-const files = [
+const schemaFiles = [
   '01_master_data.sql',
   '02_users.sql',
   '03_requests.sql',
@@ -16,7 +17,13 @@ const files = [
   '06_trust.sql'
 ];
 
-// Split SQL only at semicolons outside strings and comments.
+const seedFiles = [
+  '01_departments.sql',
+  '02_categories.sql',
+  '03_pickup_locations.sql'
+];
+
+// Split SQL at semicolons outside strings and comments.
 function getStatements(sql) {
   const statements = [];
   let statement = '';
@@ -69,9 +76,11 @@ function getStatements(sql) {
       continue;
     }
 
-    if (ch === '#' ||
-        (ch === '-' && next === '-' &&
-         (i + 2 === sql.length || /\s/.test(sql[i + 2])))) {
+    if (
+      ch === '#' ||
+      (ch === '-' && next === '-' &&
+        (i + 2 === sql.length || /\s/.test(sql[i + 2])))
+    ) {
       lineComment = true;
       if (ch === '-') i++;
       continue;
@@ -106,36 +115,46 @@ function getStatements(sql) {
   return statements;
 }
 
-async function main() {
-  try {
-    const allowedDatabases = ['campus_plus', 'campus_plus_test'];
+async function processFiles(directory, files, type) {
+  for (const file of files) {
+    const filePath = path.join(directory, file);
 
-if (!allowedDatabases.includes(process.env.DB_NAME)) {
-  throw new Error('Stopped: database name is not on the allowed list.');
-}
-
-    for (const file of files) {
-      const filePath = path.join(schemaDir, file);
-
-      if (!fs.existsSync(filePath)) {
-        throw new Error(`Schema file not found: ${file}`);
-      }
-
-      const sql = fs.readFileSync(filePath, 'utf8');
-      const statements = getStatements(sql);
-
-      console.log(`Processing ${file}...`);
-
-      for (const statement of statements) {
-        await db.query(statement);
-      }
-
-      console.log(`Completed ${file}`);
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`${type} file not found: ${file}`);
     }
 
-    console.log('All schema files processed successfully.');
+    const sql = fs.readFileSync(filePath, 'utf8');
+    const statements = getStatements(sql);
+
+    console.log(`Processing ${type}: ${file}...`);
+
+    for (const statement of statements) {
+      await db.query(statement);
+    }
+
+    console.log(`Completed ${file}`);
+  }
+}
+
+async function main() {
+  try {
+    const allowedDatabases = ['campus_plus_test'];
+
+    if (!allowedDatabases.includes(process.env.DB_NAME)) {
+      throw new Error(
+        'Stopped: set DB_NAME=campus_plus_test in backend/.env before running.'
+      );
+    }
+
+    console.log('Starting schema setup...');
+    await processFiles(schemaDir, schemaFiles, 'schema');
+
+    console.log('Starting seed data...');
+    await processFiles(seedDir, seedFiles, 'seed');
+
+    console.log('Schema and seed data processed successfully.');
   } catch (error) {
-    console.error('Schema setup failed:', error.message);
+    console.error('Database setup failed:', error.message);
     process.exitCode = 1;
   } finally {
     await db.end();
