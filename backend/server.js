@@ -9,8 +9,11 @@ const cors = require('cors');
 const db = require('./db');
 
 const app = express();
-app.use(cors());
+// // Parse incoming JSON request bodies.
+// app.use(express.json());
+
 app.use(express.json());
+app.use(cors());
 
 // Serve the frontend (open http://localhost:3000/pages/index.html)
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
