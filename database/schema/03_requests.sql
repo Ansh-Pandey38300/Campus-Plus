@@ -4,9 +4,6 @@
 -- Rules: plural lowercase table names, id as primary key, created_at on every table,
 --        DECIMAL(10,2) for money, DATETIME for dates. Only the owner edits this file.
 
-
-USE campus_plus;
-
 -- 1. Table: requests
 CREATE TABLE IF NOT EXISTS requests (
     id INT AUTO_INCREMENT PRIMARY KEY,

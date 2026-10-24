@@ -22,15 +22,3 @@ CREATE TABLE IF NOT EXISTS users (
         FOREIGN KEY (department_id)
         REFERENCES departments(id)
 ) ENGINE=InnoDB;
-
-
--- 2. Insert demo values into USERS
-INSERT INTO users
-(id, name, email, password_hash, role, department_id, created_at)
-VALUES
-(1, 'Aarav Mehta', 'aarav.mehta@example.com', 'DEMO_HASH_1', 'student', 1, '2026-10-20 09:15:00'),
-(2, 'Diya Sharma', 'diya.sharma@example.com', 'DEMO_HASH_2', 'senior', 1, '2026-10-20 09:22:00'),
-(3, 'Kabir Singh', 'kabir.singh@example.com', 'DEMO_HASH_3', 'student', 2, '2026-10-20 10:05:00'),
-(4, 'Admin User', 'admin@example.com', 'DEMO_HASH_4', 'admin', NULL, '2026-10-20 10:30:00');
-
-
