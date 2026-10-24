@@ -4,9 +4,9 @@
 -- Rules: plural lowercase table names, id as primary key, created_at on every table,
 --        DECIMAL(10,2) for money, DATETIME for dates. Only the owner edits this file.
 -- 3. Create RATINGS table
-CREATE TABLE ratings (
+CREATE TABLE IF NOT EXISTS ratings (
     id INT NOT NULL AUTO_INCREMENT,
-    transaction_id INT NOT NULL UNIQUE,
+    deal_id INT NOT NULL UNIQUE,
     rater_id INT NOT NULL,
     seller_id INT NOT NULL,
     stars INT NOT NULL,
@@ -18,9 +18,9 @@ CREATE TABLE ratings (
     CONSTRAINT chk_ratings_stars
         CHECK (stars BETWEEN 1 AND 5),
 
-    CONSTRAINT fk_ratings_transaction
-        FOREIGN KEY (transaction_id)
-        REFERENCES transactions(id),
+    CONSTRAINT fk_ratings_deal
+        FOREIGN KEY (deal_id)
+        REFERENCES deals(id),
 
     CONSTRAINT fk_ratings_rater
         FOREIGN KEY (rater_id)
@@ -34,7 +34,7 @@ CREATE TABLE ratings (
 
 -- 4. Insert demo values into RATINGS
 INSERT INTO ratings
-(id, transaction_id, rater_id, seller_id, stars, comment, created_at)
+(id, deal_id, rater_id, seller_id, stars, comment, created_at)
 VALUES
 (1, 101, 1, 2, 5, 'Item as described.', '2026-10-20 11:00:00'),
 (2, 102, 2, 1, 4, 'Smooth handover.', '2026-10-20 12:15:00'),
@@ -42,7 +42,7 @@ VALUES
 
 
 -- 5. Create NOTIFICATIONS table
-CREATE TABLE notifications (
+CREATE TABLE IF NOT EXISTS notifications (
     id INT NOT NULL AUTO_INCREMENT,
     user_id INT NOT NULL,
     message VARCHAR(1000) NOT NULL,

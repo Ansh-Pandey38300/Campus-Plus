@@ -11,8 +11,8 @@ USE campus_plus;
 CREATE TABLE IF NOT EXISTS requests (
     id INT AUTO_INCREMENT PRIMARY KEY,
     buyer_id INT NOT NULL,
-    category_id INT NOT NULL,
-    pickup_location_id INT NOT NULL,
+    category_id INT UNSIGNED NOT NULL,
+    pickup_location_id INT UNSIGNED NOT NULL,
     title VARCHAR(150) NOT NULL,
     description TEXT NOT NULL,
     max_budget DECIMAL(10,2) NOT NULL CHECK (max_budget > 0),
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS requests (
 CREATE TABLE IF NOT EXISTS seller_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     seller_id INT NOT NULL,
-    category_id INT NOT NULL,
+    category_id INT UNSIGNED NOT NULL,
     title VARCHAR(150) NOT NULL,
     item_condition VARCHAR(30) NOT NULL,
     asking_price DECIMAL(10,2) NOT NULL CHECK (asking_price > 0),
