@@ -171,12 +171,22 @@ export default function Login() {
         >
           {/* Email */}
           <div>
-            <label
-              htmlFor="login-email"
-              className="mb-2 block text-sm font-semibold text-slate-700"
-            >
-              Email address
-            </label>
+            <div className="mb-2 flex items-center justify-between">
+              <label
+                htmlFor="login-password"
+                className="block text-sm font-semibold text-slate-700"
+              >
+                Password
+              </label>
+
+              {/* Forgot Password Link */}
+              <Link
+                to="/forgot-password"
+                className="text-sm font-semibold text-blue-600 hover:text-blue-700"
+              >
+                Forgot password?
+              </Link>
+            </div>
 
             <div className="relative">
               <Mail
@@ -198,11 +208,10 @@ export default function Login() {
                   errors.email ? 'login-email-error' : undefined
                 }
                 required
-                className={`w-full rounded-xl border bg-white py-3 pl-11 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 ${
-                  errors.email
+                className={`w-full rounded-xl border bg-white py-3 pl-11 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 ${errors.email
                     ? 'border-red-400'
                     : 'border-slate-200'
-                }`}
+                  }`}
               />
             </div>
 
@@ -247,11 +256,10 @@ export default function Login() {
                     : undefined
                 }
                 required
-                className={`w-full rounded-xl border bg-white py-3 pl-11 pr-12 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 ${
-                  errors.password
+                className={`w-full rounded-xl border bg-white py-3 pl-11 pr-12 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 ${errors.password
                     ? 'border-red-400'
                     : 'border-slate-200'
-                }`}
+                  }`}
               />
 
               <button
