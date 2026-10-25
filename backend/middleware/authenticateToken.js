@@ -1,67 +1,75 @@
+
 const db = require('../db');
+
 const { verifyAccessToken } = require('../utils/tokenService');
+const asyncHandler = require('../utils/asyncHandler');
+const AppError = require('../utils/AppError');
 
-async function authenticateToken(req, res, next) {
-  try {
-    const authHeader = req.headers.authorization;
+const authenticateToken = asyncHandler(async (req, res, next) => {
+  const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({
-        message: 'Authentication token is required.'
-      });
-    }
-
-    const token = authHeader.slice(7).trim();
-
-    if (!token) {
-      return res.status(401).json({
-        message: 'Authentication token is required.'
-      });
-    }
-
-    const decoded = verifyAccessToken(token);
-    const userId = Number(decoded.sub);
-
-    if (!Number.isSafeInteger(userId) || userId <= 0) {
-      return res.status(401).json({
-        message: 'Invalid authentication token.'
-      });
-    }
-
-    const [users] = await db.execute(
-      `SELECT id, name, email, role, department_id
-       FROM users
-       WHERE id = ?
-       LIMIT 1`,
-      [userId]
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    throw new AppError(
+      'Authentication token is required.',
+      401
     );
+  }
 
-    if (users.length === 0) {
-      return res.status(401).json({
-        message: 'User account no longer exists.'
-      });
-    }
+  const token = authHeader.slice(7).trim();
 
-    req.user = users[0];
+  if (!token) {
+    throw new AppError(
+      'Authentication token is required.',
+      401
+    );
+  }
 
-    next();
+  let decoded;
+
+  try {
+    decoded = verifyAccessToken(token);
   } catch (error) {
     if (
       error.name === 'JsonWebTokenError' ||
       error.name === 'TokenExpiredError' ||
       error.name === 'NotBeforeError'
     ) {
-      return res.status(401).json({
-        message: 'Invalid or expired authentication token.'
-      });
+      throw new AppError(
+        'Invalid or expired authentication token.',
+        401
+      );
     }
 
-    console.error('Authentication error:', error.message);
-
-    return res.status(500).json({
-      message: 'Authentication failed because of a server error.'
-    });
+    throw error;
   }
-}
+
+  const userId = Number(decoded.sub);
+
+  if (!Number.isSafeInteger(userId) || userId <= 0) {
+    throw new AppError(
+      'Invalid authentication token.',
+      401
+    );
+  }
+
+  const [users] = await db.execute(
+    `SELECT id, name, email, role, department_id
+     FROM users
+     WHERE id = ?
+     LIMIT 1`,
+    [userId]
+  );
+
+  if (users.length === 0) {
+    throw new AppError(
+      'User account no longer exists.',
+      401
+    );
+  }
+
+  req.user = users[0];
+
+  next();
+});
 
 module.exports = authenticateToken;

@@ -1,15 +1,21 @@
+
+const AppError = require('../utils/AppError');
+
 function authorizeRole(...allowedRoles) {
   return function (req, res, next) {
     if (!req.user) {
-      return res.status(401).json({
-        message: 'Authentication is required.'
-      });
+      return next(
+        new AppError('Authentication is required.', 401)
+      );
     }
 
     if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({
-        message: 'You do not have permission to access this resource.'
-      });
+      return next(
+        new AppError(
+          'You do not have permission to access this resource.',
+          403
+        )
+      );
     }
 
     next();
