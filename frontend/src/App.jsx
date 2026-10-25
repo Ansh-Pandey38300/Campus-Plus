@@ -1,3 +1,4 @@
+
 import { Route, Routes } from 'react-router';
 
 import Navbar from './components/layout/Navbar';
@@ -10,8 +11,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import NotFound from './pages/NotFound';
 import Dashboard from './pages/Dashboard';
-
-
+import RequestList from './pages/RequestList';
+import CreateRequest from './pages/CreateRequest';
 
 function ForgotPasswordPlaceholder() {
   return (
@@ -41,7 +42,6 @@ export default function App() {
         <Route element={<GuestRoute />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-
           <Route
             path="/forgot-password"
             element={<ForgotPasswordPlaceholder />}
@@ -50,9 +50,11 @@ export default function App() {
 
         {/* Pages available only to authenticated users */}
         <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/requests" element={<RequestList />} />
           <Route
-            path="/dashboard"
-            element={<Dashboard />}
+            path="/requests/create"
+            element={<CreateRequest />}
           />
         </Route>
 

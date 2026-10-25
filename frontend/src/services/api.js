@@ -68,3 +68,38 @@ export function checkAdminAccess(token) {
     },
   });
 }
+
+
+// Request APIs.
+
+// Fetch all available categories.
+export function getRequestCategories() {
+  return request('/api/requests/categories');
+}
+
+// Fetch all requests.
+export function getRequests() {
+  return request('/api/requests');
+}
+
+// Fetch available pickup locations.
+export function getPickupLocations() {
+  return request('/api/requests/pickup-locations');
+}
+
+// Create a request using the saved JWT.
+export function createRequest(payload) {
+  const token = localStorage.getItem('campus_plus_token');
+
+  if (!token) {
+    throw new Error('Please sign in before creating a request.');
+  }
+
+  return request('/api/requests', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+}

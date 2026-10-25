@@ -11,6 +11,21 @@ async function getCategories(req, res) {
   });
 }
 
+
+
+async function getPickupLocations(req, res) {
+  const pickupLocations =
+    await requestService.getPickupLocations();
+
+  res.status(200).json({
+    success: true,
+    count: pickupLocations.length,
+    pickupLocations
+  });
+}
+
+
+
 async function getRequests(req, res) {
   const requests = await requestService.getRequests();
 
@@ -36,6 +51,7 @@ async function createRequest(req, res) {
 
 module.exports = {
   getCategories,
+  getPickupLocations,
   getRequests,
   createRequest
 };

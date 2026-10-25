@@ -73,6 +73,20 @@ export default function Navbar() {
                 <LayoutDashboard size={16} />
                 <span className="hidden sm:inline">Dashboard</span>
               </Link>
+               
+
+
+               
+
+               {user && (
+               <NavLink to="/requests" className={navLinkClass}>
+                Requests
+               </NavLink>
+             )}
+
+
+
+
 
               <button
                 type="button"
