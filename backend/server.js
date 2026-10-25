@@ -119,7 +119,7 @@ app.use(errorMiddleware);
 const PORT = Number(process.env.PORT) || 3000;
 
 const server = app.listen(PORT, () => {
-  console.log(`Campus Plus API running on port ${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
 
 // Graceful shutdown for database connections.
