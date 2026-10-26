@@ -16,6 +16,23 @@ async function getRequests() {
   return await requestModel.getRequests();
 }
 
+// Get a request by ID.
+async function getRequestById(id) {
+  const requestId = Number(id);
+
+  if (!Number.isSafeInteger(requestId) || requestId <= 0) {
+    throw new AppError('Invalid request ID.', 400);
+  }
+
+  const request = await requestModel.getRequestById(requestId);
+
+  if (!request) {
+    throw new AppError('Request not found.', 404);
+  }
+
+  return request;
+}
+
 // Validate and create a new request.
 async function createRequest(buyerId, data) {
   const {
@@ -146,5 +163,6 @@ module.exports = {
   getCategories,
   getPickupLocations,
   getRequests,
+  getRequestById,
   createRequest
 };

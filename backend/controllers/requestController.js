@@ -36,6 +36,19 @@ async function getRequests(req, res) {
   });
 }
 
+
+async function getRequestById(req, res) {
+  const request = await requestService.getRequestById(
+    req.params.id
+  );
+
+  res.status(200).json({
+    success: true,
+    request
+  });
+}
+
+
 async function createRequest(req, res) {
   const request = await requestService.createRequest(
     req.user.id,
@@ -53,5 +66,6 @@ module.exports = {
   getCategories,
   getPickupLocations,
   getRequests,
+  getRequestById,
   createRequest
 };
