@@ -12,6 +12,16 @@ async function getCategories() {
   return categories;
 }
 
+async function getPickupLocations() {
+  const [locations] = await db.execute(
+    `SELECT id, name, description
+     FROM pickup_locations
+     ORDER BY name ASC`
+  );
+
+  return locations;
+}
+
 async function getRequests() {
   const [requests] = await db.execute(
     `SELECT
@@ -187,6 +197,7 @@ async function createRequest(buyerId, data) {
 
 module.exports = {
   getCategories,
+  getPickupLocations,
   getRequests,
   createRequest
 };

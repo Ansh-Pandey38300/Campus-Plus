@@ -11,6 +11,13 @@ router.get(
   asyncHandler(requestController.getCategories)
 );
 
+
+router.get(
+  '/requests/pickup-locations',
+  asyncHandler(requestController.getPickupLocations)
+);
+
+
 router.get(
   '/requests',
   asyncHandler(requestController.getRequests)
