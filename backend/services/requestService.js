@@ -48,6 +48,49 @@ async function getRequests() {
   return requests;
 }
 
+
+
+async function getRequestById(id) {
+  const requestId = Number(id);
+
+  if (!Number.isSafeInteger(requestId) || requestId <= 0) {
+    throw new AppError('Invalid request ID.', 400);
+  }
+
+  const [requests] = await db.execute(
+    `SELECT
+       r.id,
+       r.buyer_id,
+       r.category_id,
+       c.name AS category_name,
+       c.parent_id AS category_parent_id,
+       r.pickup_location_id,
+       p.name AS pickup_location_name,
+       r.title,
+       r.description,
+       r.max_budget,
+       r.deadline,
+       r.status,
+       r.created_at
+     FROM requests r
+     INNER JOIN categories c ON c.id = r.category_id
+     INNER JOIN pickup_locations p
+       ON p.id = r.pickup_location_id
+     WHERE r.id = ?
+     LIMIT 1`,
+    [requestId]
+  );
+
+  if (requests.length === 0) {
+    throw new AppError('Request not found.', 404);
+  }
+
+  return requests[0];
+}
+
+
+
+
 async function createRequest(buyerId, data) {
   const {
     category_id,
@@ -199,5 +242,6 @@ module.exports = {
   getCategories,
   getPickupLocations,
   getRequests,
+  getRequestById,
   createRequest
 };

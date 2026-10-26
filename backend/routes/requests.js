@@ -23,6 +23,13 @@ router.get(
   asyncHandler(requestController.getRequests)
 );
 
+
+router.get(
+  '/requests/:id',
+  asyncHandler(requestController.getRequestById)
+);
+
+
 router.post(
   '/requests',
   authenticateToken,
