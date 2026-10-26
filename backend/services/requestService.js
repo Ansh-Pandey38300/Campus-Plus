@@ -1,53 +1,22 @@
-
-const db = require('../db');
 const AppError = require('../utils/AppError');
+const requestModel = require('../models/requestModel');
 
+// Get all categories.
 async function getCategories() {
-  const [categories] = await db.execute(
-    `SELECT id, name, parent_id
-     FROM categories
-     ORDER BY name ASC`
-  );
-
-  return categories;
+  return await requestModel.getCategories();
 }
 
+// Get all pickup locations.
 async function getPickupLocations() {
-  const [locations] = await db.execute(
-    `SELECT id, name, description
-     FROM pickup_locations
-     ORDER BY name ASC`
-  );
-
-  return locations;
+  return await requestModel.getPickupLocations();
 }
 
+// Get all requests.
 async function getRequests() {
-  const [requests] = await db.execute(
-    `SELECT
-       r.id,
-       r.buyer_id,
-       r.category_id,
-       c.name AS category_name,
-       c.parent_id AS category_parent_id,
-       r.pickup_location_id,
-       p.name AS pickup_location_name,
-       r.title,
-       r.description,
-       r.max_budget,
-       r.deadline,
-       r.status,
-       r.created_at
-     FROM requests r
-     INNER JOIN categories c ON c.id = r.category_id
-     INNER JOIN pickup_locations p
-       ON p.id = r.pickup_location_id
-     ORDER BY r.created_at DESC, r.id DESC`
-  );
-
-  return requests;
+  return await requestModel.getRequests();
 }
 
+// Validate and create a new request.
 async function createRequest(buyerId, data) {
   const {
     category_id,
@@ -62,6 +31,7 @@ async function createRequest(buyerId, data) {
   const locationId = Number(pickup_location_id);
   const budget = Number(max_budget);
 
+  // Validate category ID.
   if (
     !Number.isSafeInteger(categoryId) ||
     categoryId <= 0
@@ -69,6 +39,7 @@ async function createRequest(buyerId, data) {
     throw new AppError('Invalid category ID.', 400);
   }
 
+  // Validate pickup location ID.
   if (
     !Number.isSafeInteger(locationId) ||
     locationId <= 0
@@ -76,6 +47,7 @@ async function createRequest(buyerId, data) {
     throw new AppError('Invalid pickup location ID.', 400);
   }
 
+  // Validate maximum budget.
   if (!Number.isFinite(budget) || budget <= 0) {
     throw new AppError(
       'Maximum budget must be greater than zero.',
@@ -90,6 +62,7 @@ async function createRequest(buyerId, data) {
     );
   }
 
+  // Validate title.
   if (
     typeof title !== 'string' ||
     !title.trim() ||
@@ -101,6 +74,7 @@ async function createRequest(buyerId, data) {
     );
   }
 
+  // Validate description.
   if (
     typeof description !== 'string' ||
     !description.trim()
@@ -108,6 +82,7 @@ async function createRequest(buyerId, data) {
     throw new AppError('Description is required.', 400);
   }
 
+  // Validate deadline format.
   if (
     typeof deadline !== 'string' ||
     !/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z)?$/.test(deadline)
@@ -115,6 +90,7 @@ async function createRequest(buyerId, data) {
     throw new AppError('Invalid deadline format.', 400);
   }
 
+  // Validate deadline value and ensure it is in the future.
   const deadlineDate = new Date(deadline);
 
   if (
@@ -124,75 +100,46 @@ async function createRequest(buyerId, data) {
     throw new AppError('Deadline must be in the future.', 400);
   }
 
-  const [categories] = await db.execute(
-    'SELECT id FROM categories WHERE id = ? LIMIT 1',
-    [categoryId]
+  // Check whether the category exists.
+  const categoryExists = await requestModel.categoryExists(
+    categoryId
   );
 
-  if (!categories.length) {
+  if (!categoryExists) {
     throw new AppError(
       'Selected category does not exist.',
       400
     );
   }
 
-  const [locations] = await db.execute(
-    'SELECT id FROM pickup_locations WHERE id = ? LIMIT 1',
-    [locationId]
-  );
+  // Check whether the pickup location exists.
+  const locationExists =
+    await requestModel.pickupLocationExists(locationId);
 
-  if (!locations.length) {
+  if (!locationExists) {
     throw new AppError(
       'Selected pickup location does not exist.',
       400
     );
   }
 
-  const [result] = await db.execute(
-    `INSERT INTO requests (
-       buyer_id,
-       category_id,
-       pickup_location_id,
-       title,
-       description,
-       max_budget,
-       deadline
-     ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [
-      buyerId,
-      categoryId,
-      locationId,
-      title.trim(),
-      description.trim(),
-      budget,
-      deadline.replace('T', ' ').replace(/Z$/, '')
-    ]
+  // Insert the request through the model.
+  const requestId = await requestModel.insertRequest({
+    buyerId,
+    categoryId,
+    locationId,
+    title: title.trim(),
+    description: description.trim(),
+    budget,
+    deadline: deadline.replace('T', ' ').replace(/Z$/, '')
+  });
+
+  // Fetch and return the newly created request.
+  const createdRequest = await requestModel.getRequestById(
+    requestId
   );
 
-  const [created] = await db.execute(
-    `SELECT
-       r.id,
-       r.buyer_id,
-       r.category_id,
-       c.name AS category_name,
-       r.pickup_location_id,
-       p.name AS pickup_location_name,
-       r.title,
-       r.description,
-       r.max_budget,
-       r.deadline,
-       r.status,
-       r.created_at
-     FROM requests r
-     INNER JOIN categories c ON c.id = r.category_id
-     INNER JOIN pickup_locations p
-       ON p.id = r.pickup_location_id
-     WHERE r.id = ?
-     LIMIT 1`,
-    [result.insertId]
-  );
-
-  return created[0];
+  return createdRequest;
 }
 
 module.exports = {

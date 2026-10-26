@@ -1,10 +1,10 @@
-
 const bcrypt = require('bcryptjs');
-const db = require('../db');
 
 const AppError = require('../utils/AppError');
 const { isCollegeEmail } = require('../utils/emailValidator');
 const { createAccessToken } = require('../utils/tokenService');
+
+const authModel = require('../models/authModel');
 
 async function loginUser(email, password) {
   if (
@@ -18,20 +18,14 @@ async function loginUser(email, password) {
 
   const normalizedEmail = email.trim().toLowerCase();
 
-  const [users] = await db.execute(
-    `SELECT id, name, email, password_hash, role, department_id
-     FROM users
-     WHERE email = ?
-     LIMIT 1`,
-    [normalizedEmail]
-  );
+  // Retrieve the user through the model.
+  const user = await authModel.findUserByEmail(normalizedEmail);
 
-  if (users.length === 0) {
+  if (!user) {
     throw new AppError('Invalid email or password.', 401);
   }
 
-  const user = users[0];
-
+  // Password verification remains in the service.
   const passwordMatches = await bcrypt.compare(
     password,
     user.password_hash
@@ -106,6 +100,7 @@ async function registerUser(data) {
     );
   }
 
+  // Validate the college email address.
   let collegeEmail;
 
   try {
@@ -126,6 +121,7 @@ async function registerUser(data) {
     );
   }
 
+  // Validate the optional department ID.
   let normalizedDepartmentId = null;
 
   if (department_id !== undefined && department_id !== null) {
@@ -141,12 +137,11 @@ async function registerUser(data) {
       );
     }
 
-    const [departments] = await db.execute(
-      'SELECT id FROM departments WHERE id = ?',
-      [normalizedDepartmentId]
+    const exists = await authModel.departmentExists(
+      normalizedDepartmentId
     );
 
-    if (departments.length === 0) {
+    if (!exists) {
       throw new AppError(
         'The selected department does not exist.',
         400
@@ -154,39 +149,33 @@ async function registerUser(data) {
     }
   }
 
-  const [existingUsers] = await db.execute(
-    'SELECT id FROM users WHERE email = ? LIMIT 1',
-    [normalizedEmail]
-  );
+  // Check whether the email is already registered.
+  const existingUser =
+    await authModel.findUserByEmailForRegistration(
+      normalizedEmail
+    );
 
-  if (existingUsers.length > 0) {
+  if (existingUser) {
     throw new AppError(
       'An account with this email already exists.',
       409
     );
   }
 
+  // Password hashing remains in the service.
   const passwordHash = await bcrypt.hash(password, 12);
 
-  let result;
+  let userId;
 
   try {
-    const [insertResult] = await db.execute(
-      `INSERT INTO users
-        (name, email, password_hash, role, department_id)
-       VALUES (?, ?, ?, 'student', ?)`,
-      [
-        normalizedName,
-        normalizedEmail,
-        passwordHash,
-        normalizedDepartmentId
-      ]
-    );
-
-    result = insertResult;
+    userId = await authModel.createUser({
+      name: normalizedName,
+      email: normalizedEmail,
+      passwordHash,
+      departmentId: normalizedDepartmentId
+    });
   } catch (error) {
-    // The database's UNIQUE constraint is the final
-    // protection against simultaneous duplicate registrations.
+    // Preserve protection against simultaneous duplicate registrations.
     if (error.code === 'ER_DUP_ENTRY') {
       throw new AppError(
         'An account with this email already exists.',
@@ -198,7 +187,7 @@ async function registerUser(data) {
   }
 
   return {
-    id: result.insertId,
+    id: userId,
     name: normalizedName,
     email: normalizedEmail,
     role: 'student',
