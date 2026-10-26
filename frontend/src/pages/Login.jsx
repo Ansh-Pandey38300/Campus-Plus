@@ -176,16 +176,11 @@ export default function Login() {
                 htmlFor="login-password"
                 className="block text-sm font-semibold text-slate-700"
               >
-                Password
+                Email
               </label>
 
               {/* Forgot Password Link */}
-              <Link
-                to="/forgot-password"
-                className="text-sm font-semibold text-blue-600 hover:text-blue-700"
-              >
-                Forgot password?
-              </Link>
+              
             </div>
 
             <div className="relative">
@@ -214,6 +209,7 @@ export default function Login() {
                   }`}
               />
             </div>
+           
 
             {errors.email && (
               <p
@@ -289,8 +285,15 @@ export default function Login() {
                 {errors.password}
               </p>
             )}
-          </div>
+            <Link
+                to="/forgot-password"
+                className="text-sm font-semibold text-blue-600 hover:text-blue-700"
+              >
+                Forgot password?
+              </Link>
 
+          </div>
+           
           {/* API error */}
           {serverError && (
             <div
