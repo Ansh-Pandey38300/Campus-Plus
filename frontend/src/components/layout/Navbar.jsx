@@ -54,6 +54,11 @@ export default function Navbar() {
               Dashboard
             </NavLink>
           )}
+          {user && (
+               <NavLink to="/requests" className={navLinkClass}>
+                Requests
+               </NavLink>
+             )}
         </div>
 
         {/* Show the correct actions for the current authentication state */}
@@ -73,16 +78,8 @@ export default function Navbar() {
                 <LayoutDashboard size={16} />
                 <span className="hidden sm:inline">Dashboard</span>
               </Link>
+              
                
-
-
-               
-
-               {user && (
-               <NavLink to="/requests" className={navLinkClass}>
-                Requests
-               </NavLink>
-             )}
 
 
 
