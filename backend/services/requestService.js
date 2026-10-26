@@ -16,6 +16,23 @@ async function getRequests() {
   return await requestModel.getRequests();
 }
 
+// Get a single request by ID.
+async function getRequestById(id) {
+  const requestId = Number(id);
+
+  if (!Number.isSafeInteger(requestId) || requestId <= 0) {
+    throw new AppError('Invalid request ID.', 400);
+  }
+
+  const request = await requestModel.getRequestById(requestId);
+
+  if (!request) {
+    throw new AppError('Request not found.', 404);
+  }
+
+  return request;
+}
+
 // Validate and create a new request.
 async function createRequest(buyerId, data) {
   const {
@@ -134,10 +151,16 @@ async function createRequest(buyerId, data) {
     deadline: deadline.replace('T', ' ').replace(/Z$/, '')
   });
 
-  // Fetch and return the newly created request.
-  const createdRequest = await requestModel.getRequestById(
-    requestId
-  );
+  // Fetch the newly created request.
+  const createdRequest =
+    await requestModel.getCreatedRequestById(requestId);
+
+  if (!createdRequest) {
+    throw new AppError(
+      'Request was created but could not be retrieved.',
+      500
+    );
+  }
 
   return createdRequest;
 }
@@ -146,5 +169,6 @@ module.exports = {
   getCategories,
   getPickupLocations,
   getRequests,
+  getRequestById,
   createRequest
 };
