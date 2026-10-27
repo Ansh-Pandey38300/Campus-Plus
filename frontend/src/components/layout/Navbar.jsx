@@ -59,6 +59,13 @@ export default function Navbar() {
                 Requests
                </NavLink>
              )}
+
+             {user && (
+                  <NavLink to="/seller-items" className={navLinkClass}>
+                    My Seller Items
+                  </NavLink>
+             )}
+             
         </div>
 
         {/* Show the correct actions for the current authentication state */}

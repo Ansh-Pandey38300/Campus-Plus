@@ -69,7 +69,7 @@ export function AuthProvider({ children }) {
             JSON.stringify(currentUser),
           );
         }
-      } catch (error) {
+      } catch {
         if (!cancelled) {
           localStorage.removeItem(TOKEN_KEY);
           localStorage.removeItem(USER_KEY);
@@ -131,6 +131,8 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
+
+
 
 export function useAuth() {
   const context = useContext(AuthContext);
