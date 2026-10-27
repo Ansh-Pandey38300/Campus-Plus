@@ -71,6 +71,7 @@ export default function RequestList() {
 
 
 useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   loadRequests();
 }, [loadRequests]);
 

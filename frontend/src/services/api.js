@@ -103,3 +103,42 @@ export function createRequest(payload) {
     body: JSON.stringify(payload),
   });
 }
+
+//////seller
+
+
+function getSavedAuthToken() {
+  const token = localStorage.getItem('campus_plus_token');
+
+  if (!token) {
+    throw new Error('Please sign in to continue.');
+  }
+
+  return token;
+}
+
+// Fetch categories for the seller item form.
+export function getSellerItemCategories() {
+  return getRequestCategories();
+}
+
+// Fetch items belonging to the logged-in seller.
+export function getMySellerItems() {
+  return request('/api/seller-items/my', {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${getSavedAuthToken()}`
+    }
+  });
+}
+
+// Add a new item for the logged-in seller.
+export function createSellerItem(payload) {
+  return request('/api/seller-items', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${getSavedAuthToken()}`
+    },
+    body: JSON.stringify(payload)
+  });
+}
