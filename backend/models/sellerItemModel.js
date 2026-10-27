@@ -68,8 +68,48 @@ async function getSellerItems(sellerId) {
   return rows;
 }
 
+async function listSellerItems(category) {
+  let query = `
+    SELECT
+      si.id,
+      si.seller_id,
+      si.category_id,
+      c.name AS category_name,
+      si.title,
+      si.item_condition,
+      si.asking_price,
+      si.description,
+      si.status,
+      si.created_at
+    FROM seller_items si
+    INNER JOIN categories c
+      ON c.id = si.category_id
+    WHERE si.status = 'active'
+  `;
+
+  const params = [];
+
+  if (category !== undefined && category !== '') {
+    const categoryId = Number(category);
+
+    if (Number.isSafeInteger(categoryId) && categoryId > 0) {
+      query += ' AND si.category_id = ?';
+      params.push(categoryId);
+    } else {
+      query += ' AND c.name = ?';
+      params.push(category);
+    }
+  }
+
+  query += ' ORDER BY si.created_at DESC, si.id DESC';
+
+  const [rows] = await db.execute(query, params);
+  return rows;
+}
+
 module.exports = {
   categoryExists,
   insertSellerItem,
-  getSellerItems
+  getSellerItems,
+  listSellerItems
 };

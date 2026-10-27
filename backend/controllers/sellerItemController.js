@@ -26,7 +26,20 @@ async function getMySellerItems(req, res) {
   });
 }
 
+async function listSellerItems(req, res) {
+  const items = await sellerItemService.listSellerItems(
+    req.query.category
+  );
+
+  res.status(200).json({
+    success: true,
+    count: items.length,
+    items
+  });
+}
+
 module.exports = {
   createSellerItem,
-  getMySellerItems
+  getMySellerItems,
+  listSellerItems
 };

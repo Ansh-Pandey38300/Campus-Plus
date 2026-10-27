@@ -82,6 +82,7 @@ async function createSellerItem(sellerId, data) {
   });
 
   const items = await sellerItemModel.getSellerItems(sellerId);
+  
   const createdItem = items.find(
     (item) => Number(item.id) === Number(itemId)
   );
@@ -100,7 +101,12 @@ async function getMySellerItems(sellerId) {
   return sellerItemModel.getSellerItems(sellerId);
 }
 
+async function listSellerItems(category) {
+  return sellerItemModel.listSellerItems(category);
+}
+
 module.exports = {
   createSellerItem,
-  getMySellerItems
+  getMySellerItems,
+  listSellerItems
 };

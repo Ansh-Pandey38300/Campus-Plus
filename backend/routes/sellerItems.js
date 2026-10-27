@@ -13,6 +13,12 @@ router.get(
   asyncHandler(sellerItemController.getMySellerItems)
 );
 
+// List active marketplace items with an optional category filter.
+router.get(
+  '/seller-items',
+  asyncHandler(sellerItemController.listSellerItems)
+);
+
 // Add an item for the logged-in seller.
 router.post(
   '/seller-items',
