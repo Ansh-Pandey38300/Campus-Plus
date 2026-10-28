@@ -1,5 +1,6 @@
 
 const requestService = require('../services/requestService');
+const requestDeadlineService = require('../services/requestDeadlineService');
 
 async function getCategories(req, res) {
   const categories = await requestService.getCategories();
@@ -10,8 +11,6 @@ async function getCategories(req, res) {
     categories
   });
 }
-
-
 
 async function getPickupLocations(req, res) {
   const pickupLocations =
@@ -24,9 +23,10 @@ async function getPickupLocations(req, res) {
   });
 }
 
-
-
+// Close expired requests before retrieving the current list.
 async function getRequests(req, res) {
+  await requestDeadlineService.closeExpiredRequests();
+
   const requests = await requestService.getRequests();
 
   res.status(200).json({
@@ -35,7 +35,6 @@ async function getRequests(req, res) {
     requests
   });
 }
-
 
 async function getRequestById(req, res) {
   const request = await requestService.getRequestById(
@@ -47,7 +46,6 @@ async function getRequestById(req, res) {
     request
   });
 }
-
 
 async function createRequest(req, res) {
   const request = await requestService.createRequest(

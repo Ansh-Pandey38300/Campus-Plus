@@ -7,7 +7,10 @@ async function closeExpiredRequests() {
      SET status = 'closed'
      WHERE status = 'open'
        AND deadline IS NOT NULL
-       AND deadline <= NOW()`
+       AND deadline <= DATE_ADD(
+         UTC_TIMESTAMP(),
+         INTERVAL 330 MINUTE
+       )`
   );
 
   return {
