@@ -269,6 +269,94 @@ async function withTransaction(work) {
   }
 }
 
+
+async function getOfferRequestId(connection, offerId) {
+  const [rows] = await connection.execute(
+    `SELECT request_id
+     FROM offers
+     WHERE id = ?
+     LIMIT 1`,
+    [offerId]
+  );
+
+  return rows[0] || null;
+}
+
+async function getRequestForSelection(connection, requestId) {
+  const [rows] = await connection.execute(
+    `SELECT
+       id,
+       buyer_id,
+       status,
+       deadline,
+       deadline <= NOW() AS is_expired
+     FROM requests
+     WHERE id = ?
+     LIMIT 1
+     FOR UPDATE`,
+    [requestId]
+  );
+
+  return rows[0] || null;
+}
+
+async function getOfferForSelection(connection, offerId) {
+  const [rows] = await connection.execute(
+    `SELECT id, request_id, seller_id, offered_price
+     FROM offers
+     WHERE id = ?
+     LIMIT 1
+     FOR UPDATE`,
+    [offerId]
+  );
+
+  return rows[0] || null;
+}
+
+async function createDeal(connection, {
+  requestId,
+  offerId,
+  buyerId,
+  sellerId,
+  agreedAmount
+}) {
+  const [result] = await connection.execute(
+    `INSERT INTO deals (
+       request_id,
+       offer_id,
+       buyer_id,
+       seller_id,
+       agreed_amount,
+       status
+     )
+     VALUES (?, ?, ?, ?, ?, 'confirmed')`,
+    [
+      requestId,
+      offerId,
+      buyerId,
+      sellerId,
+      agreedAmount
+    ]
+  );
+
+  return result.insertId;
+}
+
+async function closeRequest(connection, requestId) {
+  const [result] = await connection.execute(
+    `UPDATE requests
+     SET status = 'closed'
+     WHERE id = ?
+       AND status = 'open'`,
+    [requestId]
+  );
+
+  if (result.affectedRows !== 1) {
+    throw new Error('Request could not be closed.');
+  }
+}
+
+
 module.exports = {
   getRequestForUpdate,
   getSellerOfferForUpdate,
@@ -281,5 +369,12 @@ module.exports = {
   getSellerOffer,
   getOfferHistory,
   getOfferAccessDetails,
-  withTransaction
+  withTransaction,
+
+  // Offer selection
+  getOfferRequestId,
+  getRequestForSelection,
+  getOfferForSelection,
+  createDeal,
+  closeRequest
 };

@@ -39,4 +39,12 @@ router.get(
   getOfferHistory
 );
 
+const { selectOffer } = require('../controllers/dealController');
+
+router.post(
+  '/offers/:offerId/select',
+  authenticateToken,
+  selectOffer
+);
+
 module.exports = router;
