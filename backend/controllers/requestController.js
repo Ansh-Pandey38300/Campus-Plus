@@ -1,6 +1,8 @@
 
 const requestService = require('../services/requestService');
+const requestDeadlineService = require('../services/requestDeadlineService');
 
+// Get all categories.
 async function getCategories(req, res) {
   const categories = await requestService.getCategories();
 
@@ -11,8 +13,7 @@ async function getCategories(req, res) {
   });
 }
 
-
-
+// Get all pickup locations.
 async function getPickupLocations(req, res) {
   const pickupLocations =
     await requestService.getPickupLocations();
@@ -24,9 +25,10 @@ async function getPickupLocations(req, res) {
   });
 }
 
-
-
+// Close expired requests before returning the list.
 async function getRequests(req, res) {
+  await requestDeadlineService.closeExpiredRequests();
+
   const requests = await requestService.getRequests();
 
   res.status(200).json({
@@ -36,7 +38,7 @@ async function getRequests(req, res) {
   });
 }
 
-
+// Get one request by ID.
 async function getRequestById(req, res) {
   const request = await requestService.getRequestById(
     req.params.id
@@ -48,7 +50,7 @@ async function getRequestById(req, res) {
   });
 }
 
-
+// Create a new request.
 async function createRequest(req, res) {
   const request = await requestService.createRequest(
     req.user.id,
