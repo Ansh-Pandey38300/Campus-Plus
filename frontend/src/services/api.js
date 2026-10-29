@@ -1,8 +1,11 @@
+
 const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
 ).replace(/\/+$/, '');
 
-// Shared function for sending requests to the Campus Plus backend.
+const TOKEN_KEY = 'campus_plus_token';
+
+// Shared API request handler.
 async function request(endpoint, options = {}) {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
@@ -12,9 +15,7 @@ async function request(endpoint, options = {}) {
     },
   });
 
-  // Handle JSON responses and unexpected text responses.
   const contentType = response.headers.get('content-type') || '';
-
   const data = contentType.includes('application/json')
     ? await response.json()
     : await response.text();
@@ -33,7 +34,20 @@ async function request(endpoint, options = {}) {
   return data;
 }
 
-// Register a new student account.
+// Attach the logged-in user's JWT.
+function authHeaders() {
+  const token = localStorage.getItem(TOKEN_KEY);
+
+  if (!token) {
+    throw new Error('Please sign in to continue.');
+  }
+
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+}
+
+// Authentication APIs.
 export function registerUser({ name, email, password }) {
   return request('/api/auth/register', {
     method: 'POST',
@@ -41,7 +55,6 @@ export function registerUser({ name, email, password }) {
   });
 }
 
-// Log in with an existing account.
 export function loginUser({ email, password }) {
   return request('/api/auth/login', {
     method: 'POST',
@@ -49,57 +62,85 @@ export function loginUser({ email, password }) {
   });
 }
 
-// Get the current user's profile using the JWT access token.
 export function getCurrentUser(token) {
   return request('/api/auth/me', {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   });
 }
 
-// Check whether the current user has administrator access.
 export function checkAdminAccess(token) {
   return request('/api/admin/check', {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   });
 }
 
-
 // Request APIs.
-
-// Fetch all available categories.
 export function getRequestCategories() {
   return request('/api/requests/categories');
 }
 
-// Fetch all requests.
 export function getRequests() {
   return request('/api/requests');
 }
 
-// Fetch available pickup locations.
+export function getRequestById(requestId) {
+  return request(
+    `/api/requests/${encodeURIComponent(requestId)}`,
+  );
+}
+
 export function getPickupLocations() {
   return request('/api/requests/pickup-locations');
 }
 
-// Create a request using the saved JWT.
 export function createRequest(payload) {
-  const token = localStorage.getItem('campus_plus_token');
-
-  if (!token) {
-    throw new Error('Please sign in before creating a request.');
-  }
-
   return request('/api/requests', {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: authHeaders(),
     body: JSON.stringify(payload),
   });
+}
+
+// Offer APIs.
+export function getOffersForRequest(requestId) {
+  return request(
+    `/api/offers/requests/${encodeURIComponent(requestId)}`,
+    { headers: authHeaders() },
+  );
+}
+
+export function getMyOfferForRequest(requestId) {
+  return request(
+    `/api/offers/requests/${encodeURIComponent(requestId)}/mine`,
+    { headers: authHeaders() },
+  );
+}
+
+export function submitOffer(requestId, payload) {
+  return request(
+    `/api/offers/requests/${encodeURIComponent(requestId)}`,
+    {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function getOfferHistory(offerId) {
+  return request(
+    `/api/offers/${encodeURIComponent(offerId)}/history`,
+    { headers: authHeaders() },
+  );
+}
+
+// Select an offer as the buyer.
+export function selectOffer(offerId) {
+  return request(
+    `/api/offers/${encodeURIComponent(offerId)}/select`,
+    {
+      method: 'POST',
+      headers: authHeaders(),
+    },
+  );
 }
