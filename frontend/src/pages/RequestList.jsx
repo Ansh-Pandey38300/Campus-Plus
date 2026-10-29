@@ -1,10 +1,9 @@
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback ,useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router';
 import {
   ArrowRight,
   CalendarDays,
-  Gavel,
   MapPin,
   Plus,
   RefreshCw,
@@ -14,7 +13,6 @@ import {
 } from 'lucide-react';
 
 import { getRequests } from '../services/api';
-import { useAuth } from '../context/AuthContext';
 
 function formatDate(value) {
   if (!value) return 'Not specified';
@@ -45,35 +43,36 @@ function formatBudget(value) {
 
 export default function RequestList() {
   const location = useLocation();
-  const { user } = useAuth();
 
   const [requests, setRequests] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const loadRequests = useCallback(async () => {
-    setLoading(true);
-    setError('');
 
-    try {
-      const response = await getRequests();
 
-      setRequests(
-        Array.isArray(response?.requests)
-          ? response.requests
-          : [],
-      );
-    } catch (err) {
-      setError(err.message || 'Unable to load requests.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+ const loadRequests = useCallback(async () => {
+  setLoading(true);
+  setError('');
 
-  useEffect(() => {
-    loadRequests();
-  }, [loadRequests]);
+  try {
+    const response = await getRequests();
+
+    setRequests(
+      Array.isArray(response?.requests) ? response.requests : [],
+    );
+  } catch (err) {
+    setError(err.message || 'Unable to load requests.');
+  } finally {
+    setLoading(false);
+  }
+}, []);
+
+
+
+useEffect(() => {
+  loadRequests();
+}, [loadRequests]);
 
   const filteredRequests = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -101,14 +100,12 @@ export default function RequestList() {
               <p className="text-sm font-semibold uppercase tracking-wider text-blue-100">
                 Campus Plus Marketplace
               </p>
-
               <h1 className="mt-2 text-3xl font-extrabold text-white sm:text-4xl">
                 Student Requests
               </h1>
-
               <p className="mt-3 max-w-2xl text-sm leading-6 text-blue-100 sm:text-base">
-                Browse requests, compare offers, and help students
-                find the right items on campus.
+                Browse what students need and help them find the right
+                items on campus.
               </p>
             </div>
 
@@ -138,7 +135,6 @@ export default function RequestList() {
             <h2 className="text-xl font-bold text-slate-900">
               Available requests
             </h2>
-
             <p className="mt-1 text-sm text-slate-500">
               {loading
                 ? 'Loading requests...'
@@ -151,7 +147,6 @@ export default function RequestList() {
               size={18}
               className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
             />
-
             <input
               type="search"
               value={search}
@@ -178,7 +173,6 @@ export default function RequestList() {
             className="rounded-2xl border border-red-200 bg-white p-8 text-center"
           >
             <p className="font-semibold text-red-700">{error}</p>
-
             <button
               type="button"
               onClick={loadRequests}
@@ -195,11 +189,9 @@ export default function RequestList() {
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
               <Search size={25} />
             </div>
-
             <h3 className="mt-4 text-lg font-bold text-slate-900">
               {search ? 'No matching requests' : 'No requests yet'}
             </h3>
-
             <p className="mt-2 text-sm text-slate-500">
               {search
                 ? 'Try a different search term.'
@@ -220,90 +212,76 @@ export default function RequestList() {
 
         {!loading && !error && filteredRequests.length > 0 && (
           <div className="grid gap-5 lg:grid-cols-2">
-            {filteredRequests.map((item) => {
-              const isOwner =
-                Number(item.buyer_id) === Number(user?.id);
+            {filteredRequests.map((item) => (
+              <article
+                key={item.id}
+                className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-blue-200 hover:shadow-md sm:p-6"
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
+                    <Tag size={14} />
+                    {item.category_name || 'Uncategorized'}
+                  </span>
 
-              return (
-                <article
-                  key={item.id}
-                  className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-blue-200 hover:shadow-md sm:p-6"
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
-                      <Tag size={14} />
-                      {item.category_name || 'Uncategorized'}
-                    </span>
+                  <span
+                    className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize ${
+                      item.status === 'open'
+                        ? 'bg-green-50 text-green-700'
+                        : 'bg-slate-100 text-slate-600'
+                    }`}
+                  >
+                    {item.status || 'unknown'}
+                  </span>
+                </div>
 
-                    <span
-                      className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize ${
-                        item.status === 'open'
-                          ? 'bg-green-50 text-green-700'
-                          : 'bg-slate-100 text-slate-600'
-                      }`}
-                    >
-                      {item.status || 'unknown'}
-                    </span>
-                  </div>
+                <h3 className="mt-4 text-xl font-bold text-slate-900">
+                  {item.title}
+                </h3>
 
-                  <h3 className="mt-4 text-xl font-bold text-slate-900">
-                    {item.title}
-                  </h3>
+                <p className="mt-2 flex-1 whitespace-pre-line text-sm leading-6 text-slate-600">
+                  {item.description}
+                </p>
 
-                  <p className="mt-2 flex-1 whitespace-pre-line text-sm leading-6 text-slate-600">
-                    {item.description}
-                  </p>
-
-                  <div className="mt-5 grid gap-3 border-t border-slate-100 pt-5 sm:grid-cols-2">
-                    <div className="flex items-start gap-2.5">
-                      <Wallet size={18} className="mt-0.5 text-blue-600" />
-                      <div>
-                        <p className="text-xs text-slate-500">
-                          Maximum budget
-                        </p>
-                        <p className="mt-1 font-bold text-slate-900">
-                          {formatBudget(item.max_budget)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-2.5">
-                      <MapPin size={18} className="mt-0.5 text-blue-600" />
-                      <div>
-                        <p className="text-xs text-slate-500">
-                          Pickup location
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-slate-800">
-                          {item.pickup_location_name || 'Not specified'}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-2.5 sm:col-span-2">
-                      <CalendarDays size={18} className="mt-0.5 text-blue-600" />
-                      <div>
-                        <p className="text-xs text-slate-500">Deadline</p>
-                        <p className="mt-1 text-sm font-semibold text-slate-800">
-                          {formatDate(item.deadline)}
-                        </p>
-                      </div>
+                <div className="mt-5 grid gap-3 border-t border-slate-100 pt-5 sm:grid-cols-2">
+                  <div className="flex items-start gap-2.5">
+                    <Wallet size={18} className="mt-0.5 text-blue-600" />
+                    <div>
+                      <p className="text-xs text-slate-500">
+                        Maximum budget
+                      </p>
+                      <p className="mt-1 font-bold text-slate-900">
+                        {formatBudget(item.max_budget)}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="mt-5 border-t border-slate-100 pt-5">
-                    <Link
-                      to={`/requests/${item.id}/offers`}
-                      className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
-                    >
-                      <Gavel size={16} />
-                      {isOwner
-                        ? 'View offers'
-                        : 'View offers / submit offer'}
-                    </Link>
+                  <div className="flex items-start gap-2.5">
+                    <MapPin size={18} className="mt-0.5 text-blue-600" />
+                    <div>
+                      <p className="text-xs text-slate-500">
+                        Pickup location
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-slate-800">
+                        {item.pickup_location_name || 'Not specified'}
+                      </p>
+                    </div>
                   </div>
-                </article>
-              );
-            })}
+
+                  <div className="flex items-start gap-2.5 sm:col-span-2">
+                    <CalendarDays
+                      size={18}
+                      className="mt-0.5 text-blue-600"
+                    />
+                    <div>
+                      <p className="text-xs text-slate-500">Deadline</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-800">
+                        {formatDate(item.deadline)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))}
           </div>
         )}
       </section>

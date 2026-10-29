@@ -13,7 +13,6 @@ import NotFound from './pages/NotFound';
 import Dashboard from './pages/Dashboard';
 import RequestList from './pages/RequestList';
 import CreateRequest from './pages/CreateRequest';
-import RequestOffers from './pages/RequestOffers';
 
 function ForgotPasswordPlaceholder() {
   return (
@@ -36,8 +35,10 @@ export default function App() {
       <Navbar />
 
       <Routes>
+        {/* Public home page */}
         <Route path="/" element={<Home />} />
 
+        {/* Pages available only to logged-out visitors */}
         <Route element={<GuestRoute />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -47,6 +48,7 @@ export default function App() {
           />
         </Route>
 
+        {/* Pages available only to authenticated users */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/requests" element={<RequestList />} />
@@ -54,12 +56,9 @@ export default function App() {
             path="/requests/create"
             element={<CreateRequest />}
           />
-          <Route
-            path="/requests/:requestId/offers"
-            element={<RequestOffers />}
-          />
         </Route>
 
+        {/* Unknown routes */}
         <Route path="*" element={<NotFound />} />
       </Routes>
 

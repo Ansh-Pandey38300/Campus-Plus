@@ -13,7 +13,7 @@ async function runDeadlineCheck() {
   }
 
   isClosingExpiredRequests = true;
-  
+
   try {
     const result =
       await requestDeadlineService.closeExpiredRequests();
@@ -64,9 +64,5 @@ router.post('/requests/close-expired', async (req, res) => {
     });
   }
 });
-
-router.post('/requests/close-required',async(req,res))
-
-
 
 module.exports = router;
