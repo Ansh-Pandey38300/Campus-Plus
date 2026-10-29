@@ -101,6 +101,33 @@ export function createRequest(payload) {
   });
 }
 
+// Seller item APIs.
+export function getSellerItemCategories() {
+  return getRequestCategories();
+}
+
+export function getSellerItems(category) {
+  const query = category
+    ? `?category=${encodeURIComponent(category)}`
+    : '';
+
+  return request(`/api/seller-items${query}`);
+}
+
+export function getMySellerItems() {
+  return request('/api/seller-items/my', {
+    headers: authHeaders(),
+  });
+}
+
+export function createSellerItem(payload) {
+  return request('/api/seller-items', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(payload),
+  });
+}
+
 // Offer APIs.
 export function getOffersForRequest(requestId) {
   return request(
