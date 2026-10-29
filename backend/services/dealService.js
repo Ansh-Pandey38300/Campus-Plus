@@ -88,6 +88,11 @@ async function selectOffer(offerIdValue, buyerIdValue) {
       agreedAmount: offer.offered_price
     });
 
+    await offerModel.createPendingTransaction(connection, {
+      dealId,
+      amount: offer.offered_price
+    });
+
     await offerModel.closeRequest(connection, request.id);
 
     return {

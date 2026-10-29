@@ -341,6 +341,24 @@ async function createDeal(connection, {
 
   return result.insertId;
 }
+async function createPendingTransaction(connection, {
+  dealId,
+  amount,
+  paymentMethod = 'upi'
+}) {
+  const [result] = await connection.execute(
+    `INSERT INTO transactions (
+       deal_id,
+       amount,
+       payment_method,
+       status
+     )
+     VALUES (?, ?, ?, 'pending')`,
+    [dealId, amount, paymentMethod]
+  );
+
+  return result.insertId;
+}
 
 async function closeRequest(connection, requestId) {
   const [result] = await connection.execute(
@@ -376,5 +394,6 @@ module.exports = {
   getRequestForSelection,
   getOfferForSelection,
   createDeal,
+  createPendingTransaction,
   closeRequest
 };
