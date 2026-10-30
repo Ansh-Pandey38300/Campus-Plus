@@ -17,6 +17,8 @@ import RequestOffers from './pages/RequestOffers';
 
 import SellerItems from './pages/SellerItems';
 
+import DealDetails from './pages/DealDetails';
+
 function ForgotPasswordPlaceholder() {
   return (
     <main className="flex flex-1 items-center justify-center px-6 py-20">
@@ -51,6 +53,7 @@ export default function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/deals/:dealId" element={<DealDetails />} />
           <Route path="/requests" element={<RequestList />} />
           <Route
             path="/requests/create"
