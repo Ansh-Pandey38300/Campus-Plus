@@ -171,3 +171,54 @@ export function selectOffer(offerId) {
     },
   );
 }
+
+// Deal and handover APIs.
+export function getDealDetails(dealId) {
+  return request(`/api/deals/${encodeURIComponent(dealId)}`, {
+    headers: authHeaders(),
+  });
+}
+
+export function markDealHandedOver(dealId) {
+  return request(
+    `/api/deals/${encodeURIComponent(dealId)}/handover`,
+    {
+      method: 'POST',
+      headers: authHeaders(),
+    },
+  );
+}
+
+export function confirmDealHandover(dealId) {
+  return request(
+    `/api/deals/${encodeURIComponent(dealId)}/confirm-handover`,
+    {
+      method: 'POST',
+      headers: authHeaders(),
+    },
+  );
+}
+
+export function getMyDeals() {
+  return request('/api/deals/my', {
+    headers: authHeaders(),
+  });
+}
+
+export function markPaymentCompleted(dealId, paymentMethod) {
+  return request(`/api/deals/${encodeURIComponent(dealId)}/payment-completed`, {
+    method: 'POST',
+    headers: {
+      ...authHeaders(),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ payment_method: paymentMethod }),
+  });
+}
+
+export function confirmPaymentReceived(dealId) {
+  return request(`/api/deals/${encodeURIComponent(dealId)}/confirm-payment`, {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+}

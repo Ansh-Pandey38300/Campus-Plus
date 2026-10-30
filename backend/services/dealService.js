@@ -92,8 +92,9 @@ async function selectOffer(offerIdValue, buyerIdValue) {
       dealId,
       amount: offer.offered_price
     });
+await offerModel.createHandoverRecord(connection, dealId);
 
-    await offerModel.closeRequest(connection, request.id);
+    //await offerModel.closeRequest(connection, request.id);
 
     return {
       dealId,

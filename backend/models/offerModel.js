@@ -359,6 +359,18 @@ async function createPendingTransaction(connection, {
 
   return result.insertId;
 }
+async function createHandoverRecord(connection, dealId) {
+  const [result] = await connection.execute(
+    `INSERT INTO handover_records (
+       deal_id,
+       status
+     )
+     VALUES (?, 'agreed')`,
+    [dealId]
+  );
+
+  return result.insertId;
+}
 
 async function closeRequest(connection, requestId) {
   const [result] = await connection.execute(
@@ -395,5 +407,6 @@ module.exports = {
   getOfferForSelection,
   createDeal,
   createPendingTransaction,
+  createHandoverRecord,
   closeRequest
 };

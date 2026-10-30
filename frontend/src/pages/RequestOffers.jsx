@@ -1,6 +1,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 import {
   ArrowLeft,
   CalendarClock,
@@ -52,6 +52,7 @@ function formatDate(value) {
 
 export default function RequestOffers() {
   const { requestId } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   const [requestInfo, setRequestInfo] = useState(null);
@@ -209,13 +210,14 @@ export default function RequestOffers() {
       const response = await selectOffer(offer.id);
       const deal = response?.deal;
 
-      setNotice(
-        `Winner selected successfully. Deal #${
-          deal?.dealId ?? 'created'
-        } is confirmed.`,
-      );
+      const dealId = deal?.dealId;
 
-      await loadData(true);
+      if (dealId) {
+        navigate(`/deals/${dealId}`);
+      } else {
+          setNotice('Winner selected, but deal ID was not returned.');
+          await loadData(true);
+        }
     } catch (err) {
       setError(
         err.message || 'Unable to select this offer.',
