@@ -222,3 +222,21 @@ export function confirmPaymentReceived(dealId) {
     headers: authHeaders(),
   });
 }
+// Rating APIs.
+export function getDealRating(dealId) {
+  return request(
+    `/api/ratings/deals/${encodeURIComponent(dealId)}`,
+    {
+      headers: authHeaders(),
+    },
+  );
+}
+
+export function submitDealRating(payload) {
+  return request('/api/ratings', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(payload),
+  });
+}
+
