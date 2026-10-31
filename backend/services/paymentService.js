@@ -129,6 +129,18 @@ async function confirmPaymentReceived(dealIdValue, userId) {
     if (!transactions[0] || transactions[0].status !== 'paid') {
       throw new AppError('Buyer must mark payment completed first.', 409);
     }
+    const [handovers] = await connection.execute(
+  `SELECT status
+   FROM handover_records
+   WHERE deal_id = ?
+   LIMIT 1
+   FOR UPDATE`,
+  [dealId]
+);
+
+if (!handovers[0] || handovers[0].status !== 'confirmed') {
+  throw new AppError('Handover must be confirmed first.', 409);
+}
 
     // Seller confirmation completes the deal.
     await connection.execute(
