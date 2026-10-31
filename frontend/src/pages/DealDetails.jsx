@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router';
 import { CheckCircle2, PackageCheck, RefreshCw } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
+import DealRating from '../components/deals/DealRating';
 import {
   getDealDetails,
   markDealHandedOver,
@@ -316,8 +317,14 @@ const isBuyer = Number(user?.id) === Number(dealInfo?.buyer_id);
             >
               <RefreshCw size={15} />
               Refresh status
-            </button>
+                        </button>
           </div>
+
+          <DealRating
+            dealId={dealInfo.id}
+            dealStatus={dealInfo.status}
+            isBuyer={isBuyer}
+          />
         </section>
       </div>
     </main>
