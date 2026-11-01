@@ -31,7 +31,22 @@ const getDealRating = asyncHandler(async (req, res) => {
   });
 });
 
+
+const getSellerRatings = asyncHandler(async (req, res) => {
+  const ratings = await ratingService.getSellerRatings(
+    req.params.sellerId
+  );
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      ratings
+    }
+  });
+});
+
 module.exports = {
   submitRating,
-  getDealRating
+  getDealRating,
+  getSellerRatings
 };

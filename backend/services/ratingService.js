@@ -172,8 +172,34 @@ async function getDealRating(dealIdValue, userId) {
   };
 }
 
+async function getSellerRatings(sellerIdValue) {
+  const sellerId = Number(sellerIdValue);
+
+  if (!Number.isSafeInteger(sellerId) || sellerId <= 0) {
+    throw new AppError('Invalid seller ID.', 400);
+  }
+
+  const [ratings] = await db.execute(
+    `SELECT
+       r.id,
+       r.rater_id,
+       u.name AS rater_name,
+       r.seller_id,
+       r.stars,
+       r.comment,
+       r.created_at
+     FROM ratings r
+     INNER JOIN users u ON u.id = r.rater_id
+     WHERE r.seller_id = ?
+     ORDER BY r.created_at DESC, r.id DESC`,
+    [sellerId]
+  );
+
+  return ratings;
+}
 
 module.exports = {
   submitRating,
-  getDealRating
+  getDealRating,
+  getSellerRatings
 };
