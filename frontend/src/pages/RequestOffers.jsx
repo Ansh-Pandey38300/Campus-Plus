@@ -19,6 +19,7 @@ import {
   getOffersForRequest,
   getMyOfferForRequest,
   getRequestById,
+  getSellerRatings,
   selectOffer,
   submitOffer,
 } from '../services/api';
@@ -66,6 +67,9 @@ export default function RequestOffers() {
   const [offerNote, setOfferNote] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [expandedSellerId, setExpandedSellerId] = useState(null);
+  const [sellerRatings, setSellerRatings] = useState({});
+  const [ratingsLoading, setRatingsLoading] = useState({});
 
   const isOwner =
     Number(requestInfo?.buyer_id) === Number(user?.id);
@@ -126,7 +130,7 @@ export default function RequestOffers() {
     } catch (err) {
       setError(
         err.message ||
-          'Unable to load this request and its offers.',
+        'Unable to load this request and its offers.',
       );
     } finally {
       setLoading(false);
@@ -195,8 +199,7 @@ export default function RequestOffers() {
 
   async function handleSelectOffer(offer) {
     const confirmed = window.confirm(
-      `Select ${
-        offer.seller_name || `seller #${offer.seller_id}`
+      `Select ${offer.seller_name || `seller #${offer.seller_id}`
       } at ${money(offer.offered_price)}? This creates a confirmed deal and closes the request.`,
     );
 
@@ -215,15 +218,60 @@ export default function RequestOffers() {
       if (dealId) {
         navigate(`/deals/${dealId}`);
       } else {
-          setNotice('Winner selected, but deal ID was not returned.');
-          await loadData(true);
-        }
+        setNotice('Winner selected, but deal ID was not returned.');
+        await loadData(true);
+      }
     } catch (err) {
       setError(
         err.message || 'Unable to select this offer.',
       );
     } finally {
       setSelectingOfferId(null);
+    }
+  }
+
+  async function handleViewSellerRatings(sellerId) {
+    // Close the currently expanded reviews if clicked again.
+    if (Number(expandedSellerId) === Number(sellerId)) {
+      setExpandedSellerId(null);
+      return;
+    }
+
+    setExpandedSellerId(sellerId);
+
+    // Don't fetch again if ratings are already loaded.
+    if (sellerRatings[sellerId]) {
+      return;
+    }
+
+    setRatingsLoading((previous) => ({
+      ...previous,
+      [sellerId]: true,
+    }));
+
+    try {
+      const response = await getSellerRatings(sellerId);
+
+      setSellerRatings((previous) => ({
+        ...previous,
+        [sellerId]: Array.isArray(response?.data?.ratings)
+          ? response.data.ratings
+          : [],
+      }));
+    } catch (err) {
+      setSellerRatings((previous) => ({
+        ...previous,
+        [sellerId]: null,
+      }));
+
+      setError(
+        err.message || 'Unable to load seller ratings.'
+      );
+    } finally {
+      setRatingsLoading((previous) => ({
+        ...previous,
+        [sellerId]: false,
+      }));
     }
   }
 
@@ -270,11 +318,10 @@ export default function RequestOffers() {
             </div>
 
             <span
-              className={`inline-flex shrink-0 items-center gap-2 self-start rounded-full px-3 py-1.5 text-sm font-semibold capitalize ${
-                isClosed
-                  ? 'bg-white/15 text-white'
-                  : 'bg-emerald-100 text-emerald-800'
-              }`}
+              className={`inline-flex shrink-0 items-center gap-2 self-start rounded-full px-3 py-1.5 text-sm font-semibold capitalize ${isClosed
+                ? 'bg-white/15 text-white'
+                : 'bg-emerald-100 text-emerald-800'
+                }`}
             >
               <Clock3 size={15} />
               {requestInfo?.status || 'unknown'}
@@ -370,6 +417,23 @@ export default function RequestOffers() {
                         `Seller #${offer.seller_id}`}
                     </h3>
 
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleViewSellerRatings(offer.seller_id)
+                      }
+                      className="inline-flex items-center gap-1 rounded-full bg-yellow-50 px-2.5 py-1 text-xs font-semibold text-yellow-700 hover:bg-yellow-100 transition">
+                      <span>★</span>
+                      {Number(offer.seller_total_ratings) > 0
+                        ? `${Number(offer.seller_average_rating).toFixed(2)} (${offer.seller_total_ratings} ratings)`
+                        : 'No ratings yet'}
+                      <span className="ml-1">
+                        {Number(expandedSellerId) === Number(offer.seller_id)
+                          ? '▲'
+                          : '▼'}
+                      </span>
+                    </button>
+
                     {isOwnOffer && (
                       <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
                         Your offer
@@ -386,6 +450,74 @@ export default function RequestOffers() {
                     <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-600">
                       {offer.offer_note}
                     </p>
+                  )}
+                  {/* Seller Reviews */}
+                  {Number(expandedSellerId) === Number(offer.seller_id) && (
+                    <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+
+                      <h4 className="text-sm font-bold text-slate-900">
+                        All Seller Reviews
+                      </h4>
+
+                      {ratingsLoading[offer.seller_id] ? (
+                        <p className="mt-3 text-sm text-slate-500">
+                          Loading seller reviews...
+                        </p>
+                      ) : sellerRatings[offer.seller_id] === null ? (
+                        <p className="mt-3 text-sm text-red-600">
+                          Unable to load seller reviews. Please try again.
+                        </p>
+                      ) : sellerRatings[offer.seller_id]?.length === 0 ? (
+                        <p className="mt-3 text-sm text-slate-500">
+                          This seller has not received any ratings yet.
+                        </p>
+                      ) : (
+                        <div className="mt-3 space-y-3">
+
+                          {sellerRatings[offer.seller_id]?.map((rating) => (
+                            <div
+                              key={rating.id}
+                              className="rounded-lg border border-slate-200 bg-white p-4"
+                            >
+
+                              {/* Rater Name */}
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+
+                                <p className="text-sm font-semibold text-slate-900">
+                                  {rating.rater_name || 'Anonymous'}
+                                </p>
+
+                                <span className="text-xs text-slate-400">
+                                  {formatDate(rating.created_at)}
+                                </span>
+
+                              </div>
+
+                              {/* Rating Stars */}
+                              <div className="mt-2 flex items-center gap-1">
+
+                                <span className="text-sm font-semibold text-amber-600">
+                                  {'★'.repeat(Number(rating.stars))}
+                                </span>
+
+                                <span className="text-xs text-slate-500">
+                                  ({rating.stars}/5)
+                                </span>
+
+                              </div>
+
+                              {/* Rating Description */}
+                              <p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-600">
+                                {rating.comment || 'No written review provided.'}
+                              </p>
+
+                            </div>
+                          ))}
+
+                        </div>
+                      )}
+
+                    </div>
                   )}
                 </div>
 

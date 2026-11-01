@@ -164,7 +164,7 @@ async function getOfferById(offerId) {
   return rows[0] || null;
 }
 
-// Retrieve all offers for a request.
+// Retrieve all offers for a request, including seller ratings.
 async function getOffersForRequest(requestId) {
   const [rows] = await db.execute(
     `SELECT
@@ -175,10 +175,24 @@ async function getOffersForRequest(requestId) {
        o.offered_price,
        o.offer_note,
        o.created_at,
-       o.updated_at
+       o.updated_at,
+       COALESCE(seller_ratings.average_rating, 0) AS seller_average_rating,
+       COALESCE(seller_ratings.total_ratings, 0) AS seller_total_ratings
      FROM offers o
      INNER JOIN users u ON u.id = o.seller_id
+
+     LEFT JOIN (
+       SELECT
+         seller_id,
+         ROUND(AVG(stars), 2) AS average_rating,
+         COUNT(*) AS total_ratings
+       FROM ratings
+       GROUP BY seller_id
+     ) seller_ratings
+       ON seller_ratings.seller_id = o.seller_id
+
      WHERE o.request_id = ?
+
      ORDER BY o.offered_price ASC, o.created_at ASC, o.id ASC`,
     [requestId]
   );

@@ -232,6 +232,15 @@ export function getDealRating(dealId) {
   );
 }
 
+export function getSellerRatings(sellerId) {
+  return request(
+    `/api/ratings/sellers/${encodeURIComponent(sellerId)}`,
+    {
+      headers: authHeaders(),
+    },
+  );
+}
+
 export function submitDealRating(payload) {
   return request('/api/ratings', {
     method: 'POST',
