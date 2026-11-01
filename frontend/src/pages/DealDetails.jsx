@@ -4,6 +4,7 @@ import { CheckCircle2, PackageCheck, RefreshCw } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
 import DealRating from '../components/deals/DealRating';
+import DealComplaint from '../components/deals/DealComplaint';
 import {
   getDealDetails,
   markDealHandedOver,
@@ -325,6 +326,11 @@ const isBuyer = Number(user?.id) === Number(dealInfo?.buyer_id);
             dealStatus={dealInfo.status}
             isBuyer={isBuyer}
           />
+                    {(isBuyer || isSeller) && (
+            <div className="mt-6">
+              <DealComplaint dealId={dealInfo.id} />
+            </div>
+          )}
         </section>
       </div>
     </main>

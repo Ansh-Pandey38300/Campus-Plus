@@ -239,4 +239,11 @@ export function submitDealRating(payload) {
     body: JSON.stringify(payload),
   });
 }
-
+// Complaint APIs.
+export function submitComplaint(payload) {
+  return request('/api/complaints', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(payload),
+  });
+}
