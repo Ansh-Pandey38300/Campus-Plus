@@ -22,3 +22,7 @@ CREATE TABLE IF NOT EXISTS users (
         FOREIGN KEY (department_id)
         REFERENCES departments(id)
 ) ENGINE=InnoDB;
+//updated user table
+ALTER TABLE users
+ADD COLUMN is_blocked BOOLEAN NOT NULL DEFAULT FALSE,
+ADD COLUMN blocked_until DATETIME NULL;

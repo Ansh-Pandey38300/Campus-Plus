@@ -38,9 +38,9 @@ export default function Navbar() {
 
         {/* Main navigation links */}
         <div className="hidden items-center gap-8 md:flex">
-          <NavLink to="/" className={navLinkClass}>
+          {/* <NavLink to="/" className={navLinkClass}>
             Home
-          </NavLink>
+          </NavLink> */}
 
           {/* <Link
             to="/#features"
@@ -49,23 +49,64 @@ export default function Navbar() {
             Features
           </Link> */}
 
-          {user && (
-            <NavLink to="/dashboard" className={navLinkClass}>
-              Dashboard
+          <div className="hidden items-center gap-8 md:flex">
+
+            {user?.role === 'admin' ? (
+              <>
+                <NavLink to="/admin" end className={navLinkClass}>
+                  Admin Dashboard
+                </NavLink>
+
+                <NavLink to="/admin/users" className={navLinkClass}>
+                  Manage Users
+                </NavLink>
+
+                <NavLink to="/admin/complaints" className={navLinkClass}>
+                  Complaints
+                </NavLink>
+              </>
+            ) : (
+              <>
+                <NavLink to="/" className={navLinkClass}>
+                  Home
+                </NavLink>
+
+                {user && (
+                  <>
+                    <NavLink to="/dashboard" className={navLinkClass}>
+                      Dashboard
+                    </NavLink>
+
+                    <NavLink to="/requests" className={navLinkClass}>
+                      Requests
+                    </NavLink>
+
+                    <NavLink to="/seller-items" className={navLinkClass}>
+                      My Seller Items
+                    </NavLink>
+                  </>
+                )}
+              </>
+            )}
+
+          </div>
+          {/* {user?.role === 'admin' && (
+            <NavLink to="/admin" className={navLinkClass}>
+              Admin Panel
             </NavLink>
           )}
           {user && (
-               <NavLink to="/requests" className={navLinkClass}>
-                Requests
-               </NavLink>
-             )}
+            <NavLink to="/requests" className={navLinkClass}>
+              Requests
+            </NavLink>
+          )}
 
-             {user && (
-                  <NavLink to="/seller-items" className={navLinkClass}>
-                    My Seller Items
-                  </NavLink>
-             )}
-             
+          {user && (
+            <NavLink to="/seller-items" className={navLinkClass}>
+              My Seller Items
+            </NavLink>
+          )} */}
+
         </div>
 
         {/* Show the correct actions for the current authentication state */}
@@ -82,11 +123,12 @@ export default function Navbar() {
                 to="/dashboard"
                 className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 sm:px-4"
               >
+                {/* <Link to={user?.role === 'admin' ? '/admin' : '/dashboard'}></Link> */}
                 <LayoutDashboard size={16} />
                 <span className="hidden sm:inline">Dashboard</span>
               </Link>
-              
-               
+
+
 
 
 
