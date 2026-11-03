@@ -21,24 +21,48 @@ export default function AdminComplaints() {
   const [processing, setProcessing] = useState(null);
 
   async function loadComplaints() {
-    try {
-      setLoading(true);
-      setError('');
+  try {
+    setLoading(true);
+    setError('');
 
+    const response = await getAdminComplaints();
+
+    setComplaints(response.data || []);
+  } catch (err) {
+    setError(err.message || 'Could not load complaints.');
+  } finally {
+    setLoading(false);
+  }
+}
+
+useEffect(() => {
+  let cancelled = false;
+
+  async function fetchComplaints() {
+    try {
       const response = await getAdminComplaints();
 
-      setComplaints(response.data || []);
+      if (!cancelled) {
+        setComplaints(response.data || []);
+        setError('');
+      }
     } catch (err) {
-      setError(err.message || 'Could not load complaints.');
+      if (!cancelled) {
+        setError(err.message || 'Could not load complaints.');
+      }
     } finally {
-      setLoading(false);
+      if (!cancelled) {
+        setLoading(false);
+      }
     }
   }
 
-  useEffect(() => {
-    loadComplaints();
-  }, []);
+  fetchComplaints();
 
+  return () => {
+    cancelled = true;
+  };
+}, []);
   async function handleModeration(
     complaint,
     type,

@@ -38,8 +38,33 @@ export default function DealDetails() {
   }, [dealId]);
 
   useEffect(() => {
-    loadDeal();
-  }, [loadDeal]);
+  let cancelled = false;
+
+  async function fetchDeal() {
+    try {
+      const response = await getDealDetails(dealId);
+
+      if (!cancelled) {
+        setDeal(response);
+        setError('');
+      }
+    } catch (err) {
+      if (!cancelled) {
+        setError(err.message || 'Unable to load deal details.');
+      }
+    } finally {
+      if (!cancelled) {
+        setLoading(false);
+      }
+    }
+  }
+
+  fetchDeal();
+
+  return () => {
+    cancelled = true;
+  };
+}, [dealId]);
   const [paymentMethod, setPaymentMethod] = useState('upi');
 
   async function handleHandoverAction(action) {
