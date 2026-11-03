@@ -64,6 +64,10 @@ export default function Navbar() {
                 <NavLink to="/admin/complaints" className={navLinkClass}>
                   Complaints
                 </NavLink>
+
+                <NavLink to="/admin/reports" className={navLinkClass}>
+                  Reports
+                </NavLink>
               </>
             ) : (
               <>

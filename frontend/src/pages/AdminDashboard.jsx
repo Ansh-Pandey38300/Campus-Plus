@@ -5,7 +5,8 @@ import {
   AlertTriangle,
   CheckCircle,
   RefreshCw,
-  UserX
+  UserX,
+  FileText
 } from 'lucide-react';
 
 import { Link } from 'react-router';
@@ -205,6 +206,36 @@ export default function AdminDashboard() {
           </Link>
 
         </section>
+
+    {/* Reports */}
+
+<section className="mt-6 rounded-2xl border bg-white p-6 shadow-sm">
+
+<div className="flex items-center gap-3">
+  <div className="rounded-xl bg-blue-100 p-3 text-blue-700">
+    <FileText size={24} />
+  </div>
+
+  <div>
+    <h2 className="text-xl font-bold text-slate-900">
+      Reports & Analytics
+    </h2>
+
+    <p className="mt-1 text-slate-500">
+      View platform statistics, top categories, seller performance,
+      and buyer savings.
+    </p>
+    </div>
+    </div>
+
+    <Link
+      to="/admin/reports"
+      className="mt-5 inline-flex rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
+    >
+      View Reports
+    </Link>
+
+    </section>
 
       </div>
     </main>
