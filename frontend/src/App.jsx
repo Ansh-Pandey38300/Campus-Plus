@@ -5,7 +5,6 @@ import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
 import GuestRoute from './components/GuestRoute';
-
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -14,10 +13,12 @@ import Dashboard from './pages/Dashboard';
 import RequestList from './pages/RequestList';
 import CreateRequest from './pages/CreateRequest';
 import RequestOffers from './pages/RequestOffers';
-
 import SellerItems from './pages/SellerItems';
-
 import DealDetails from './pages/DealDetails';
+import AdminRoute from './components/AdminRoute';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminUsers from './pages/AdminUsers';
+import AdminComplaints from './pages/AdminComplaints';
 
 function ForgotPasswordPlaceholder() {
   return (
@@ -65,8 +66,26 @@ export default function App() {
           />
         </Route>
 
-        <Route path="*" element={<NotFound />} />
+        <Route element={<AdminRoute />}>
 
+          <Route
+            path="/admin"
+            element={<AdminDashboard />}
+          />
+
+          <Route
+            path="/admin/users"
+            element={<AdminUsers />}
+          />
+
+          <Route
+            path="/admin/complaints"
+            element={<AdminComplaints />}
+          />
+
+        </Route>
+
+        <Route path="*" element={<NotFound />} />
         <Route
           path="/seller-items"
           element={<SellerItems />}

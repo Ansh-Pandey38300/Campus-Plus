@@ -256,3 +256,45 @@ export function submitComplaint(payload) {
     body: JSON.stringify(payload),
   });
 }
+
+// ADMIN APIs
+
+export function getAdminComplaints() {
+  return request('/api/admin/complaints', {
+    headers: authHeaders()
+  });
+}
+
+export function moderateComplaint(
+  complaintId,
+  payload
+) {
+  return request(
+    `/api/admin/complaints/${complaintId}/moderate`,
+    {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(payload)
+    }
+  );
+}
+
+export function getAdminUsers(search = '') {
+  const query = search
+    ? `?search=${encodeURIComponent(search)}`
+    : '';
+
+  return request(`/api/admin/users${query}`, {
+    headers: authHeaders()
+  });
+}
+
+export function unblockAdminUser(userId) {
+  return request(
+    `/api/admin/users/${encodeURIComponent(userId)}/unblock`,
+    {
+      method: 'PATCH',
+      headers: authHeaders()
+    }
+  );
+}

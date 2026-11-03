@@ -31,6 +31,11 @@ export default function ProtectedRoute() {
     );
   }
 
-  // If authenticated, render the requested protected page.
-  return <Outlet />;
+  // Admins should use the admin interface, not student pages.
+if (user.role === 'admin') {
+  return <Navigate to="/admin" replace />;
+}
+
+// Normal users can access student pages.
+return <Outlet />;
 }

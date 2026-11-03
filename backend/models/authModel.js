@@ -3,12 +3,20 @@ const db = require('../db');
 // Find a user by email for login.
 async function findUserByEmail(email) {
   const [users] = await db.execute(
-    `SELECT id, name, email, password_hash, role, department_id
-     FROM users
-     WHERE email = ?
-     LIMIT 1`,
-    [email]
-  );
+  `SELECT
+     id,
+     name,
+     email,
+     password_hash,
+     role,
+     department_id,
+     is_blocked,
+     blocked_until
+   FROM users
+   WHERE email = ?
+   LIMIT 1`,
+  [email]
+);
 
   return users.length > 0 ? users[0] : null;
 }

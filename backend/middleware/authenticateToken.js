@@ -53,10 +53,17 @@ const authenticateToken = asyncHandler(async (req, res, next) => {
   }
 
   const [users] = await db.execute(
-    `SELECT id, name, email, role, department_id
-     FROM users
-     WHERE id = ?
-     LIMIT 1`,
+    `SELECT
+     id,
+     name,
+     email,
+     role,
+     department_id,
+     is_blocked,
+     blocked_until
+   FROM users
+   WHERE id = ?
+   LIMIT 1`,
     [userId]
   );
 
@@ -67,6 +74,32 @@ const authenticateToken = asyncHandler(async (req, res, next) => {
     );
   }
 
+  const user = users[0];
+
+  if (user.is_blocked) {
+    const expired =
+      user.blocked_until &&
+      new Date(user.blocked_until) <= new Date();
+
+    if (!expired) {
+      throw new AppError(
+        'Your account is temporarily blocked.',
+        403
+      );
+    }
+
+    await db.execute(
+      `UPDATE users
+     SET is_blocked = FALSE,
+         blocked_until = NULL
+     WHERE id = ?`,
+      [user.id]
+    );
+
+    user.is_blocked = 0;
+    user.blocked_until = null;
+  }
+// req.user = users;
   req.user = users[0];
 
   next();

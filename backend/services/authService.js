@@ -35,6 +35,30 @@ async function loginUser(email, password) {
     throw new AppError('Invalid email or password.', 401);
   }
 
+  // Check whether the account is currently blocked.
+  if (user.is_blocked) {
+    if (
+      user.blocked_until &&
+      new Date(user.blocked_until) <= new Date()
+    ) {
+      // The temporary block has expired.
+      const db = require('../db');
+
+      await db.execute(
+        `UPDATE users
+       SET is_blocked = FALSE,
+           blocked_until = NULL
+       WHERE id = ?`,
+        [user.id]
+      );
+    } else {
+      throw new AppError(
+        'Your account is temporarily blocked due to a moderation action.',
+        403
+      );
+    }
+  }
+
   let token;
 
   try {
