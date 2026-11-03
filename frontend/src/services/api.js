@@ -298,3 +298,9 @@ export function unblockAdminUser(userId) {
     }
   );
 }
+
+export function getAdminReports() {
+  return request('/api/admin/reports', {
+    headers: authHeaders(),
+  });
+}

@@ -19,6 +19,7 @@ import AdminRoute from './components/AdminRoute';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminUsers from './pages/AdminUsers';
 import AdminComplaints from './pages/AdminComplaints';
+import AdminReports from './pages/AdminReports';
 
 function ForgotPasswordPlaceholder() {
   return (
@@ -82,6 +83,11 @@ export default function App() {
             path="/admin/complaints"
             element={<AdminComplaints />}
           />
+
+        <Route
+          path="/admin/reports"
+          element={<AdminReports />}
+        />
 
         </Route>
 
