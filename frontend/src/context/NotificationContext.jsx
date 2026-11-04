@@ -128,7 +128,7 @@ export function NotificationProvider({ children }) {
       {children}
 
       <div
-        className="pointer-events-none fixed left-1/2 top-20 z-[100] flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 flex-col gap-3"
+        className="pointer-events-none fixed left-1/2 top-20 z-100 flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 flex-col gap-3"
         aria-live="polite"
         aria-atomic="false"
       >
