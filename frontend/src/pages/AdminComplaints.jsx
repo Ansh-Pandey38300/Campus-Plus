@@ -1,19 +1,12 @@
 import { useEffect, useState } from 'react';
-import {
-  ShieldCheck,
-  AlertTriangle,
-  Ban,
-  RefreshCw,
-  CheckCircle,
-  Users
-} from 'lucide-react';
-
-import {
-  getAdminComplaints,
-  moderateComplaint
-} from '../services/api';
+import { ShieldCheck, AlertTriangle, Ban, RefreshCw, CheckCircle, Users } from 'lucide-react';
+import { getAdminComplaints, moderateComplaint } from '../services/api';
+import { useNotification } from '../context/NotificationContext';
+import { useDialog } from '../context/DialogContext';
 
 export default function AdminComplaints() {
+  const { confirm, prompt } = useDialog();
+  const { success, error: showError, } = useNotification();
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -21,48 +14,49 @@ export default function AdminComplaints() {
   const [processing, setProcessing] = useState(null);
 
   async function loadComplaints() {
-  try {
-    setLoading(true);
-    setError('');
-
-    const response = await getAdminComplaints();
-
-    setComplaints(response.data || []);
-  } catch (err) {
-    setError(err.message || 'Could not load complaints.');
-  } finally {
-    setLoading(false);
-  }
-}
-
-useEffect(() => {
-  let cancelled = false;
-
-  async function fetchComplaints() {
     try {
+      setLoading(true);
+      setError('');
+
       const response = await getAdminComplaints();
 
-      if (!cancelled) {
-        setComplaints(response.data || []);
-        setError('');
-      }
+      setComplaints(response.data || []);
     } catch (err) {
-      if (!cancelled) {
-        setError(err.message || 'Could not load complaints.');
-      }
+      setError(err.message || 'Could not load complaints.');
     } finally {
-      if (!cancelled) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   }
 
-  fetchComplaints();
+  useEffect(() => {
+    let cancelled = false;
 
-  return () => {
-    cancelled = true;
-  };
-}, []);
+    async function fetchComplaints() {
+      try {
+        const response = await getAdminComplaints();
+
+        if (!cancelled) {
+          setComplaints(response.data || []);
+          setError('');
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err.message || 'Could not load complaints.');
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchComplaints();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   async function handleModeration(
     complaint,
     type,
@@ -70,10 +64,18 @@ useEffect(() => {
   ) {
     let days = null;
 
+    // Ask for block duration using custom input modal.
     if (type === 'temporary_block') {
-      const input = window.prompt(
+      const input = await prompt(
         'Enter block duration in days (1-30):',
-        '7'
+        '7',
+        {
+          title: 'Temporary User Block',
+          inputType: 'number',
+          min: 1,
+          max: 30,
+          placeholder: 'Enter days',
+        }
       );
 
       if (input === null) return;
@@ -85,15 +87,20 @@ useEffect(() => {
         days < 1 ||
         days > 30
       ) {
-        window.alert('Enter a duration between 1 and 30 days.');
+        const validationMessage =
+          'Enter a duration between 1 and 30 days.';
+
+        setError(validationMessage);
+        showError(validationMessage);
         return;
       }
     }
 
-    const confirmed = window.confirm(
-      `Are you sure you want to ${
-        type === 'warning' ? 'warn' : 'block'
-      } this user?`
+    // Ask for confirmation using custom modal.
+    const confirmed = await confirm(
+      `Are you sure you want to ${type === 'warning' ? 'warn' : 'block'
+      } this user?`,
+      'Confirm Moderation Action'
     );
 
     if (!confirmed) return;
@@ -106,21 +113,26 @@ useEffect(() => {
       await moderateComplaint(complaint.id, {
         user_id: userId,
         type,
-        days
+        days,
       });
 
-      setMessage(
+      const successMessage =
         type === 'warning'
           ? 'Warning issued successfully.'
-          : 'User temporarily blocked successfully.'
-      );
+          : 'User temporarily blocked successfully.';
+
+      setMessage(successMessage);
+      success(successMessage);
 
       await loadComplaints();
 
     } catch (err) {
-      setError(
-        err.message || 'Moderation action failed.'
-      );
+      const errorMessage =
+        err.message || 'Moderation action failed.';
+
+      setError(errorMessage);
+      showError(errorMessage);
+
     } finally {
       setProcessing(null);
     }
@@ -253,13 +265,12 @@ useEffect(() => {
                         Complaint #{complaint.id}
                       </h3>
 
-                      <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        complaint.status === 'resolved'
-                          ? 'bg-green-100 text-green-700'
-                          : complaint.status === 'rejected'
-                            ? 'bg-red-100 text-red-700'
-                            : 'bg-amber-100 text-amber-700'
-                      }`}>
+                      <span className={`rounded-full px-3 py-1 text-xs font-semibold ${complaint.status === 'resolved'
+                        ? 'bg-green-100 text-green-700'
+                        : complaint.status === 'rejected'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-amber-100 text-amber-700'
+                        }`}>
                         {complaint.status}
                       </span>
 

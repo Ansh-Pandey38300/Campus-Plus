@@ -1,6 +1,6 @@
-
 const AppError = require('../utils/AppError');
 const offerModel = require('../models/offerModel');
+const notificationService = require('./notificationService');
 
 function parsePositiveId(value, label) {
   const id = Number(value);
@@ -92,7 +92,19 @@ async function selectOffer(offerIdValue, buyerIdValue) {
       dealId,
       amount: offer.offered_price
     });
-await offerModel.createHandoverRecord(connection, dealId);
+    await offerModel.createHandoverRecord(connection, dealId);
+
+    // Notify the selected seller.
+    await notificationService.createNotification(
+      {
+        userId: offer.seller_id,
+        type: 'deal',
+        message: 'Congratulations! Your offer has been selected by the buyer.',
+        referenceType: 'deal',
+        referenceId: dealId
+      },
+      connection
+    );
 
     //await offerModel.closeRequest(connection, request.id);
 

@@ -15,8 +15,17 @@ async function runDeadlineCheck() {
   isClosingExpiredRequests = true;
 
   try {
+    const closingSoonCount =
+      await requestDeadlineService.notifyClosingSoonRequests();
+
     const result =
       await requestDeadlineService.closeExpiredRequests();
+
+    if (closingSoonCount > 0) {
+      console.log(
+        `[Request Deadlines] Sent ${closingSoonCount} closing-soon notification(s).`
+      );
+    }
 
     if (result.closedCount > 0) {
       console.log(
@@ -49,12 +58,16 @@ if (typeof deadlineInterval.unref === 'function') {
 
 router.post('/requests/close-expired', async (req, res) => {
   try {
+    const closingSoonCount =
+      await requestDeadlineService.notifyClosingSoonRequests();
+
     const result =
       await requestDeadlineService.closeExpiredRequests();
 
     res.status(200).json({
       message: 'Expired requests processed successfully.',
-      closedCount: result.closedCount
+      closedCount: result.closedCount,
+      closingSoonCount
     });
   } catch (error) {
     console.error('Manual deadline check failed:', error);

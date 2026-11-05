@@ -23,6 +23,8 @@ import {
   selectOffer,
   submitOffer,
 } from '../services/api';
+import { useNotification } from '../context/NotificationContext';
+import { useDialog } from '../context/DialogContext';
 
 function money(value) {
   const amount = Number(value);
@@ -52,6 +54,8 @@ function formatDate(value) {
 }
 
 export default function RequestOffers() {
+  const { success, error: showError, } = useNotification();
+  const { confirm } = useDialog();
   const { requestId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -160,7 +164,10 @@ export default function RequestOffers() {
     const price = Number(offerPrice);
 
     if (!Number.isFinite(price) || price <= 0) {
-      setError('Enter an offer price greater than zero.');
+      const message = 'Enter an offer price greater than zero.';
+
+      setError(message);
+      showError(message);
       return;
     }
 
@@ -168,9 +175,11 @@ export default function RequestOffers() {
       requestInfo?.max_budget != null &&
       price > Number(requestInfo.max_budget)
     ) {
-      setError(
-        "Your offer cannot exceed the request's maximum budget.",
-      );
+      const message =
+        "Your offer cannot exceed the request's maximum budget.";
+
+      setError(message);
+      showError(message);
       return;
     }
 
@@ -182,25 +191,32 @@ export default function RequestOffers() {
         offer_note: offerNote.trim(),
       });
 
-      setNotice(
-        result?.message || 'Offer saved successfully.',
-      );
+      const message =
+        result?.message || 'Offer saved successfully.';
+
+      setNotice(message);
+      success(message);
 
       setOfferPrice('');
       setOfferNote('');
 
       await loadData(true);
     } catch (err) {
-      setError(err.message || 'Unable to submit offer.');
+      const message =
+        err.message || 'Unable to submit offer.';
+
+      setError(message);
+      showError(message);
     } finally {
       setSubmitting(false);
     }
   }
 
   async function handleSelectOffer(offer) {
-    const confirmed = window.confirm(
+    const confirmed = await confirm(
       `Select ${offer.seller_name || `seller #${offer.seller_id}`
       } at ${money(offer.offered_price)}? This creates a confirmed deal and closes the request.`,
+      'Confirm Winner Selection'
     );
 
     if (!confirmed) return;
@@ -211,20 +227,31 @@ export default function RequestOffers() {
 
     try {
       const response = await selectOffer(offer.id);
-      const deal = response?.deal;
 
+      const deal = response?.deal;
       const dealId = deal?.dealId;
 
       if (dealId) {
+        success('Winner selected successfully!');
+
         navigate(`/deals/${dealId}`);
       } else {
-        setNotice('Winner selected, but deal ID was not returned.');
+        const message =
+          'Winner selected, but deal ID was not returned.';
+
+        setNotice(message);
+        showError(message);
+
         await loadData(true);
       }
+
     } catch (err) {
-      setError(
-        err.message || 'Unable to select this offer.',
-      );
+      const message =
+        err.message || 'Unable to select this offer.';
+
+      setError(message);
+      showError(message);
+
     } finally {
       setSelectingOfferId(null);
     }
@@ -291,7 +318,7 @@ export default function RequestOffers() {
 
   return (
     <main className="flex-1 bg-slate-50">
-      <section className="bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700">
+      <section className="bg-linear-to-br from-blue-700 via-blue-600 to-indigo-700">
         <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
           <Link
             to="/requests"

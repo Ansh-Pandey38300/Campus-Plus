@@ -304,3 +304,34 @@ export function getAdminReports() {
     headers: authHeaders(),
   });
 }
+
+// Notification APIs
+
+export function getNotifications(limit = 20, offset = 0) {
+  return request(
+    `/api/notifications?limit=${limit}&offset=${offset}`,
+    {
+      headers: authHeaders(),
+    },
+  );
+}
+
+export function getUnreadNotificationCount() {
+  return request('/api/notifications/unread-count', {
+    headers: authHeaders(),
+  });
+}
+
+export function markNotificationAsRead(id) {
+  return request(`/api/notifications/${id}/read`, {
+    method: 'PATCH',
+    headers: authHeaders(),
+  });
+}
+
+export function markAllNotificationsAsRead() {
+  return request('/api/notifications/read-all', {
+    method: 'PATCH',
+    headers: authHeaders(),
+  });
+}

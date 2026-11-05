@@ -45,3 +45,15 @@ CREATE TABLE IF NOT EXISTS notifications (
         FOREIGN KEY (user_id)
         REFERENCES users(id)
 ) ENGINE=InnoDB;
+
+//updating notification table
+ALTER TABLE notifications
+ADD COLUMN type VARCHAR(50) NOT NULL DEFAULT 'system',
+ADD COLUMN reference_type VARCHAR(50) NULL,
+ADD COLUMN reference_id INT NULL;
+
+CREATE INDEX idx_notifications_user_read
+ON notifications(user_id, is_read);
+
+CREATE INDEX idx_notifications_created
+ON notifications(created_at);

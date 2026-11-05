@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import { getMyDeals } from '../services/api';
 import { Link } from 'react-router';
 import { useAuth } from '../context/AuthContext';
+import { useNotification } from '../context/NotificationContext';
 
 const dashboardActions = [
   {
@@ -46,36 +47,37 @@ const dashboardActions = [
 
 export default function Dashboard() {
   const { user } = useAuth();
-
   const [myDeals, setMyDeals] = useState([]);
-const [dealsLoading, setDealsLoading] = useState(true);
-const [dealsError, setDealsError] = useState('');
+  const [dealsLoading, setDealsLoading] = useState(true);
+  const [dealsError, setDealsError] = useState('');
+  const { success, error, warning, info } =useNotification();
 
-useEffect(() => {
-  async function loadMyDeals() {
-    try {
-      setDealsLoading(true);
-      setDealsError('');
+  useEffect(() => {
+    async function loadMyDeals() {
+      try {
+        setDealsLoading(true);
+        setDealsError('');
 
-      const response = await getMyDeals();
-      setMyDeals(response.deals || []);
-    } catch (error) {
-      setDealsError(error.message || 'Could not load your deals.');
-    } finally {
-      setDealsLoading(false);
+        const response = await getMyDeals();
+        setMyDeals(response.deals || []);
+      } catch (error) {
+        setDealsError(error.message || 'Could not load your deals.');
+      } finally {
+        setDealsLoading(false);
+      }
     }
-  }
 
-  if (user?.id) {
-    loadMyDeals();
-  }
-}, [user?.id]);
+    if (user?.id) {
+      loadMyDeals();
+    }
+  }, [user?.id]);
 
   const displayName = user?.name || 'Student';
   const firstName = displayName.trim().split(/\s+/)[0];
 
   return (
     <main className="flex-1 bg-slate-50">
+      
       {/* Welcome banner */}
       <section className="bg-linear-to-br from-blue-700 via-blue-600 to-indigo-700">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
@@ -130,73 +132,73 @@ useEffect(() => {
         </div>
 
         {/* My Deals */}
-<section className="mt-10">
-  <h2 className="text-2xl font-bold text-slate-900">
-    My Deals
-  </h2>
+        <section className="mt-10">
+          <h2 className="text-2xl font-bold text-slate-900">
+            My Deals
+          </h2>
 
-  <p className="mt-2 text-sm text-slate-500">
-    Deals where you are the buyer or the seller.
-  </p>
+          <p className="mt-2 text-sm text-slate-500">
+            Deals where you are the buyer or the seller.
+          </p>
 
-  {dealsLoading && (
-    <p className="mt-4 text-sm text-slate-500">Loading your deals...</p>
-  )}
+          {dealsLoading && (
+            <p className="mt-4 text-sm text-slate-500">Loading your deals...</p>
+          )}
 
-  {dealsError && (
-    <p className="mt-4 text-sm text-red-600">{dealsError}</p>
-  )}
+          {dealsError && (
+            <p className="mt-4 text-sm text-red-600">{dealsError}</p>
+          )}
 
-  {!dealsLoading && !dealsError && myDeals.length === 0 && (
-    <p className="mt-4 rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-500">
-      You are not involved in any deals yet.
-    </p>
-  )}
+          {!dealsLoading && !dealsError && myDeals.length === 0 && (
+            <p className="mt-4 rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-500">
+              You are not involved in any deals yet.
+            </p>
+          )}
 
-  <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-    {myDeals.map((deal) => {
-      const isBuyer = Number(deal.buyer_id) === Number(user.id);
+          <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {myDeals.map((deal) => {
+              const isBuyer = Number(deal.buyer_id) === Number(user.id);
 
-      return (
-        <article
-          key={deal.id}
-          className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-        >
-          <div className="flex items-center gap-3">
-            <PackageCheck className="text-blue-600" size={24} />
-            <div>
-              <h3 className="font-bold text-slate-900">
-                {deal.request_title || `Deal #${deal.id}`}
-              </h3>
-              <p className="text-sm text-slate-500">
-                Deal #{deal.id}
-              </p>
-            </div>
+              return (
+                <article
+                  key={deal.id}
+                  className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                >
+                  <div className="flex items-center gap-3">
+                    <PackageCheck className="text-blue-600" size={24} />
+                    <div>
+                      <h3 className="font-bold text-slate-900">
+                        {deal.request_title || `Deal #${deal.id}`}
+                      </h3>
+                      <p className="text-sm text-slate-500">
+                        Deal #{deal.id}
+                      </p>
+                    </div>
+                  </div>
+
+                  <p className="mt-4 font-semibold text-slate-800">
+                    Agreed Amount: ₹{deal.agreed_amount}
+                  </p>
+
+                  <p className="mt-1 text-sm text-slate-500">
+                    Your role: {isBuyer ? 'Buyer' : 'Seller'}
+                  </p>
+
+                  <p className="mt-1 text-sm capitalize text-slate-500">
+                    Handover: {(deal.handover_status || 'agreed').replaceAll('_', ' ')}
+                  </p>
+
+                  <Link
+                    to={`/deals/${deal.id}`}
+                    className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                  >
+                    View Deal <ArrowRight size={16} />
+                  </Link>
+                </article>
+              );
+            })}
           </div>
-
-          <p className="mt-4 font-semibold text-slate-800">
-            Agreed Amount: ₹{deal.agreed_amount}
-          </p>
-
-          <p className="mt-1 text-sm text-slate-500">
-            Your role: {isBuyer ? 'Buyer' : 'Seller'}
-          </p>
-
-          <p className="mt-1 text-sm capitalize text-slate-500">
-            Handover: {(deal.handover_status || 'agreed').replaceAll('_', ' ')}
-          </p>
-
-          <Link
-            to={`/deals/${deal.id}`}
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
-          >
-            View Deal <ArrowRight size={16} />
-          </Link>
-        </article>
-      );
-    })}
-  </div>
-</section>
+        </section>
         {/* Marketplace actions */}
         <div className="mt-10">
           <div>

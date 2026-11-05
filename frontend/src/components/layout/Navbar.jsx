@@ -1,6 +1,7 @@
 import { Link, NavLink, useNavigate } from 'react-router';
 import { ArrowUpRight, GraduationCap, LogOut, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import NotificationBell from '../notifications/NotificationBell';
 
 // Shared navigation that changes based on authentication state.
 export default function Navbar() {
@@ -119,6 +120,8 @@ export default function Navbar() {
             <span className="text-sm text-slate-500">Loading...</span>
           ) : user ? (
             <>
+              {/* Notification Bell */}
+              <NotificationBell />
               <span className="hidden max-w-40 truncate text-sm font-medium text-slate-700 lg:block">
                 Hi, {user.name || 'Student'}
               </span>

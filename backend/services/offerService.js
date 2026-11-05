@@ -1,6 +1,7 @@
 
 const AppError = require('../utils/AppError');
 const offerModel = require('../models/offerModel');
+const notificationService = require('./notificationService');
 
 function parsePositiveId(value, label) {
   const id = Number(value);
@@ -201,6 +202,18 @@ async function submitOffer(requestIdValue, sellerIdValue, data) {
         changedByUserId: sellerId
       });
 
+      // Notify buyer about the revised offer.
+      await notificationService.createNotification(
+        {
+          userId: request.buyer_id,
+          type: 'offer',
+          message: 'A seller has revised their offer on your request.',
+          referenceType: 'request',
+          referenceId: requestId
+        },
+        connection
+      );
+
       return {
         offerId: existingOffer.id,
         action: 'revised'
@@ -227,7 +240,6 @@ async function submitOffer(requestIdValue, sellerIdValue, data) {
       offerNote
     });
 
-    // The first history entry has no previous price.
     await offerModel.insertOfferHistory(connection, {
       offerId,
       previousPrice: null,
@@ -235,6 +247,26 @@ async function submitOffer(requestIdValue, sellerIdValue, data) {
       changedByUserId: sellerId
     });
 
+    // Notify the buyer about the newly submitted offer.
+    await notificationService.createNotification(
+      {
+        userId: request.buyer_id,
+        type: 'offer',
+        message: 'A seller has submitted a new offer on your request.',
+        referenceType: 'request',
+        referenceId: requestId
+      },
+      connection
+    );
+
+    // The first history entry has no previous price.
+    await offerModel.insertOfferHistory(connection, {
+      offerId,
+      previousPrice: null,
+      newPrice: offeredPrice,
+      changedByUserId: sellerId
+    });
+    
     return {
       offerId,
       action: 'created'
