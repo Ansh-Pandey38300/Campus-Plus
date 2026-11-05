@@ -61,7 +61,7 @@ export function NotificationProvider({ children }) {
       const id = ++nextId.current;
 
       const defaultDuration =
-        type === 'error' ? 4000 : 1000;
+        type === 'error' ? 5000 : 3000;
 
       const notification = {
         id,

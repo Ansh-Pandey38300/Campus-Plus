@@ -1,5 +1,6 @@
 const db = require('../db');
 const AppError = require('../utils/AppError');
+const notificationService = require('./notificationService');
 
 async function getComplaints() {
   const [rows] = await db.execute(`
@@ -46,6 +47,7 @@ async function moderateComplaint({
          c.id,
          c.status,
          c.reviewed_by,
+         c.reporter_id,
          d.buyer_id,
          d.seller_id
        FROM complaints c
@@ -154,6 +156,38 @@ async function moderateComplaint({
        WHERE id = ?`,
       [adminId, complaintId]
     );
+
+    // Notify the user who received the moderation action.
+    const moderationMessage =
+      type === 'warning'
+        ? 'An administrator has issued a warning to your account after reviewing a complaint.'
+        : `An administrator has temporarily blocked your account for ${days} day(s) after reviewing a complaint.`;
+
+    await notificationService.createNotification(
+      {
+        userId,
+        type: 'complaint',
+        message: moderationMessage,
+        referenceType: 'complaint',
+        referenceId: Number(complaintId)
+      },
+      connection
+    );
+
+    // Also notify the person who reported the complaint,
+    // unless they are already the user receiving the moderation action.
+    if (Number(complaint.reporter_id) !== Number(userId)) {
+      await notificationService.createNotification(
+        {
+          userId: complaint.reporter_id,
+          type: 'complaint',
+          message: 'Your complaint has been reviewed by an administrator.',
+          referenceType: 'complaint',
+          referenceId: Number(complaintId)
+        },
+        connection
+      );
+    }
 
     await connection.commit();
 

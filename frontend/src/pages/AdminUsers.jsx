@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Search, Users, RefreshCw, Unlock, } from 'lucide-react';
 import { getAdminUsers, unblockAdminUser } from '../services/api';
+import { useNotification } from '../context/NotificationContext';
+import { useDialog } from '../context/DialogContext';
 
 export default function AdminUsers() {
+  const { success, error: showError, } = useNotification();
+  const { confirm } = useDialog();
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
 
   async function loadUsers() {
     try {
@@ -24,8 +29,9 @@ export default function AdminUsers() {
   }
 
   async function handleUnblock(user) {
-    const confirmed = window.confirm(
-      `Are you sure you want to unblock ${user.name}?`
+    const confirmed = await confirm(
+      `Are you sure you want to unblock ${user.name}?`,
+      'Confirm User Unblock'
     );
 
     if (!confirmed) return;
@@ -35,16 +41,19 @@ export default function AdminUsers() {
 
       await unblockAdminUser(user.id);
 
-      window.alert(
-        `${user.name} has been unblocked successfully.`
-      );
+      const message =
+        `${user.name} has been unblocked successfully.`;
+
+      success(message);
 
       await loadUsers();
 
     } catch (err) {
-      setError(
-        err.message || 'Unable to unblock this user.'
-      );
+      const errorMessage =
+        err.message || 'Unable to unblock this user.';
+
+      setError(errorMessage);
+      showError(errorMessage);
     }
   }
 
@@ -159,8 +168,8 @@ export default function AdminUsers() {
 
                     <td className="p-4">
                       <span className={`rounded-full px-3 py-1 text-xs font-semibold ${user.is_blocked
-                          ? 'bg-red-100 text-red-700'
-                          : 'bg-green-100 text-green-700'
+                        ? 'bg-red-100 text-red-700'
+                        : 'bg-green-100 text-green-700'
                         }`}>
                         {user.is_blocked ? 'Blocked' : 'Active'}
                       </span>
