@@ -81,7 +81,11 @@ export default function Navbar() {
                     <NavLink to="/dashboard" className={navLinkClass}>
                       Dashboard
                     </NavLink>
-
+                     
+                     <NavLink to="/profile" className={navLinkClass}>
+                      My Profile
+                     </NavLink>
+                     
                     <NavLink to="/requests" className={navLinkClass}>
                       Requests
                     </NavLink>
