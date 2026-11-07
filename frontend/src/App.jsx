@@ -20,6 +20,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminUsers from './pages/AdminUsers';
 import AdminComplaints from './pages/AdminComplaints';
 import AdminReports from './pages/AdminReports';
+import Profile from './pages/Profile';
 
 function ForgotPasswordPlaceholder() {
   return (
@@ -55,6 +56,7 @@ export default function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/deals/:dealId" element={<DealDetails />} />
           <Route path="/requests" element={<RequestList />} />
           <Route

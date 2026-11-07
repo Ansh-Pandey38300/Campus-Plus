@@ -335,3 +335,18 @@ export function markAllNotificationsAsRead() {
     headers: authHeaders(),
   });
 }
+
+
+export function getMyProfile() {
+  const token = localStorage.getItem('campus_plus_token');
+
+  if (!token) {
+    throw new Error('Please sign in to continue.');
+  }
+
+  return request('/api/profile/me', {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+}
