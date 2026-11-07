@@ -2,6 +2,7 @@ const db = require('../db');
 const AppError = require('../utils/AppError');
 const notificationService = require('./notificationService');
 
+
 async function getComplaints() {
   const [rows] = await db.execute(`
     SELECT
@@ -12,18 +13,46 @@ async function getComplaints() {
       c.status,
       c.created_at,
       c.reviewed_at,
+
       reporter.name AS reporter_name,
       reporter.email AS reporter_email,
+
       d.buyer_id,
       d.seller_id,
       d.status AS deal_status,
+
       buyer.name AS buyer_name,
-      seller.name AS seller_name
+      seller.name AS seller_name,
+
+      -- Moderation details
+      p.user_id AS penalized_user_id,
+      p.type AS penalty_type,
+      p.until_date AS penalty_until_date,
+      p.created_at AS penalty_created_at,
+
+      affected_user.name AS penalized_user_name,
+      affected_user.email AS penalized_user_email
+
     FROM complaints c
-    JOIN users reporter ON reporter.id = c.reporter_id
-    JOIN deals d ON d.id = c.deal_id
-    JOIN users buyer ON buyer.id = d.buyer_id
-    JOIN users seller ON seller.id = d.seller_id
+
+    JOIN users reporter
+      ON reporter.id = c.reporter_id
+
+    JOIN deals d
+      ON d.id = c.deal_id
+
+    JOIN users buyer
+      ON buyer.id = d.buyer_id
+
+    JOIN users seller
+      ON seller.id = d.seller_id
+
+    LEFT JOIN penalties p
+      ON p.complaint_id = c.id
+
+    LEFT JOIN users affected_user
+      ON affected_user.id = p.user_id
+
     ORDER BY c.created_at DESC
   `);
 

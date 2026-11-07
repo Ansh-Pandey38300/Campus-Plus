@@ -321,74 +321,80 @@ export default function AdminComplaints() {
                     </div>
 
                     <div className="mt-5 grid gap-4 md:grid-cols-2">
+                      <div
+  className={`rounded-xl border p-4 ${
+    String(complaint.penalized_user_id) === String(complaint.buyer_id)
+      ? complaint.penalty_type === 'warning'
+        ? 'border-amber-300 bg-amber-50'
+        : 'border-red-300 bg-red-50'
+      : 'border-slate-200 bg-white'
+  }`}
+>
+  <p className="text-sm text-slate-500">Buyer</p>
 
-                      <div className="rounded-xl border p-4">
-                        <p className="text-sm text-slate-500">
-                          Buyer
-                        </p>
+  <p className="mt-1 font-semibold">
+    {complaint.buyer_name}
+  </p>
 
-                        <p className="mt-1 font-semibold">
-                          {complaint.buyer_name}
-                        </p>
+  <p className="mt-3 text-xs text-slate-400">
+    ID: {complaint.buyer_id}
+  </p>
 
-                        <p className="mt-3 text-xs text-slate-400">
-                          ID: {complaint.buyer_id}
-                        </p>
+  {String(complaint.penalized_user_id) === String(complaint.buyer_id) &&
+    complaint.penalty_type && (
+      <PenaltyDetails complaint={complaint} />
+    )}
 
-                        {canModerate && (
-                          <ModerationButtons
-                            disabled={busy}
-                            onWarn={() =>
-                              handleModeration(
-                                complaint,
-                                'warning',
-                                complaint.buyer_id
-                              )
-                            }
-                            onBlock={() =>
-                              handleModeration(
-                                complaint,
-                                'temporary_block',
-                                complaint.buyer_id
-                              )
-                            }
-                          />
-                        )}
-                      </div>
+  {canModerate && (
+    <ModerationButtons
+      disabled={busy}
+      onWarn={() =>
+        handleModeration(complaint, 'warning', complaint.buyer_id)
+      }
+      onBlock={() =>
+        handleModeration(complaint, 'temporary_block', complaint.buyer_id)
+      }
+    />
+  )}
+</div>
 
-                      <div className="rounded-xl border p-4">
-                        <p className="text-sm text-slate-500">
-                          Seller
-                        </p>
+<div
+  className={`rounded-xl border p-4 ${
+    String(complaint.penalized_user_id) === String(complaint.seller_id)
+      ? complaint.penalty_type === 'warning'
+        ? 'border-amber-300 bg-amber-50'
+        : 'border-red-300 bg-red-50'
+      : 'border-slate-200 bg-white'
+  }`}
+>
+  <p className="text-sm text-slate-500">Seller</p>
 
-                        <p className="mt-1 font-semibold">
-                          {complaint.seller_name}
-                        </p>
+  <p className="mt-1 font-semibold">
+    {complaint.seller_name}
+  </p>
 
-                        <p className="mt-3 text-xs text-slate-400">
-                          ID: {complaint.seller_id}
-                        </p>
+  <p className="mt-3 text-xs text-slate-400">
+    ID: {complaint.seller_id}
+  </p>
 
-                        {canModerate && (
-                          <ModerationButtons
-                            disabled={busy}
-                            onWarn={() =>
-                              handleModeration(
-                                complaint,
-                                'warning',
-                                complaint.seller_id
-                              )
-                            }
-                            onBlock={() =>
-                              handleModeration(
-                                complaint,
-                                'temporary_block',
-                                complaint.seller_id
-                              )
-                            }
-                          />
-                        )}
-                      </div>
+  {String(complaint.penalized_user_id) === String(complaint.seller_id) &&
+    complaint.penalty_type && (
+      <PenaltyDetails complaint={complaint} />
+    )}
+
+  {canModerate && (
+    <ModerationButtons
+      disabled={busy}
+      onWarn={() =>
+        handleModeration(complaint, 'warning', complaint.seller_id)
+      }
+      onBlock={() =>
+        handleModeration(complaint, 'temporary_block', complaint.seller_id)
+      }
+    />
+  )}
+</div>
+
 
                     </div>
 
@@ -466,6 +472,62 @@ function ModerationButtons({
         Block
       </button>
 
+    </div>
+  );
+}
+
+
+function PenaltyDetails({ complaint }) {
+  const isWarning = complaint.penalty_type === 'warning';
+
+  let blockDuration = null;
+
+  if (!isWarning && complaint.penalty_created_at && complaint.penalty_until_date) {
+    const start = new Date(complaint.penalty_created_at);
+    const end = new Date(complaint.penalty_until_date);
+
+    if (!isNaN(start) && !isNaN(end)) {
+      blockDuration = Math.ceil(
+        (end - start) / (1000 * 60 * 60 * 24)
+      );
+    }
+  }
+
+  const endDate = complaint.penalty_until_date
+    ? new Date(complaint.penalty_until_date)
+    : null;
+
+  return (
+    <div className={`mt-4 rounded-lg p-3 ${
+      isWarning
+        ? 'bg-amber-100 text-amber-800'
+        : 'bg-red-100 text-red-800'
+    }`}>
+      <div className="flex items-center gap-2 font-semibold">
+        {isWarning ? (
+          <AlertTriangle size={16} />
+        ) : (
+          <Ban size={16} />
+        )}
+
+        {isWarning ? 'Warning Issued' : 'User Blocked'}
+      </div>
+
+      {!isWarning && (
+        <div className="mt-2 text-sm">
+          <p>
+            Duration: {blockDuration !== null
+              ? `${blockDuration} days`
+              : 'Not available'}
+          </p>
+
+          {endDate && !isNaN(endDate) && (
+            <p className="mt-1">
+              Blocked until: {endDate.toLocaleDateString('en-IN')}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
