@@ -6,3 +6,4 @@ Thumbs.db
 /postman
 .env
 .env.*
+!backend/.env.example
