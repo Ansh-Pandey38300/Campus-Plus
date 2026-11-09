@@ -124,8 +124,8 @@ erDiagram
 
     DEALS {
         int id PK
-        int request_id FK UK
-        int offer_id FK UK
+        int request_id FK,UK
+        int offer_id FK,UK
         int buyer_id FK
         int seller_id FK
         decimal agreed_amount
@@ -147,7 +147,7 @@ erDiagram
 
     HANDOVER_RECORDS {
         int id PK
-        int deal_id FK UK
+        int deal_id FK,UK
         enum status
         datetime created_at
         datetime updated_at
@@ -175,7 +175,7 @@ erDiagram
 
     RATINGS {
         int id PK
-        int deal_id FK UK
+        int deal_id FK,UK
         int rater_id FK
         int seller_id FK
         int stars
