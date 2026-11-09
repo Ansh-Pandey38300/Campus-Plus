@@ -148,41 +148,41 @@
 
 ## 12. Admin Dashboard and User Management
 
-- [ ] Verify that an admin can open the admin dashboard.
-- [ ] Verify that dashboard statistics load correctly.
-- [ ] Verify that the admin can view the list of users.
-- [ ] Search users by name.
-- [ ] Search users by email or user ID.
-- [ ] Verify that user details and account status are displayed correctly.
-- [ ] Verify that an admin can unblock an eligible blocked user.
-- [ ] Verify that the user's status changes after unblocking.
-- [ ] Verify that normal users cannot access admin user management.
+- [x] Verify that an admin can open the admin dashboard.
+- [x] Verify that dashboard statistics load correctly.
+- [x] Verify that the admin can view the list of users.
+- [x] Search users by name.
+- [x] Search users by email or user ID.
+- [x] Verify that user details and account status are displayed correctly.
+- [x] Verify that an admin can unblock an eligible blocked user.
+- [x] Verify that the user's status changes after unblocking.
+- [x] Verify that normal users cannot access admin user management.
 
 ## 13. Admin Complaint Moderation
 
-- [ ] Verify that the admin can view all submitted complaints.
-- [ ] Verify that complaint details include reporter, buyer, seller and deal information.
-- [ ] Verify that the admin can issue a warning to the selected user.
-- [ ] Verify that the admin can temporarily block the selected user.
-- [ ] Verify that the block duration is validated.
-- [ ] Verify that the user's account status reflects the moderation action.
-- [ ] Verify that resolved complaints display the correct final status.
-- [ ] Verify that the affected user is identified correctly.
-- [ ] Verify that warned users are highlighted in orange.
-- [ ] Verify that blocked users are highlighted in red.
-- [ ] Verify that block duration and end date are displayed correctly.
-- [ ] Verify that unaffected users retain normal styling.
-- [ ] Verify that open complaints do not incorrectly display penalty information.
-- [ ] Verify that moderation actions generate the appropriate notifications.
+- [x] Verify that the admin can view all submitted complaints.
+- [x] Verify that complaint details include reporter, buyer, seller and deal information.
+- [x] Verify that the admin can issue a warning to the selected user.
+- [x] Verify that the admin can temporarily block the selected user.
+- [x] Verify that the block duration is validated.
+- [x] Verify that the user's account status reflects the moderation action.
+- [x] Verify that resolved complaints display the correct final status.
+- [x] Verify that the affected user is identified correctly.
+- [x] Verify that warned users are highlighted in orange.
+- [x] Verify that blocked users are highlighted in red.
+- [x] Verify that block duration and end date are displayed correctly.
+- [x] Verify that unaffected users retain normal styling.
+- [x] Verify that open complaints do not incorrectly display penalty information.
+- [x] Verify that moderation actions generate the appropriate notifications.
 
 ## 14. Admin Reports
 
-- [ ] Verify that an admin can open the reports page.
-- [ ] Verify that report data loads correctly.
-- [ ] Verify that report statistics match the underlying application data.
-- [ ] Verify that the report page handles empty data correctly.
-- [ ] Verify that loading and error states are displayed properly.
-- [ ] Verify that normal users cannot access admin reports.
+- [x] Verify that an admin can open the reports page.
+- [x] Verify that report data loads correctly.
+- [x] Verify that report statistics match the underlying application data.
+- [x] Verify that the report page handles empty data correctly.
+- [x] Verify that loading and error states are displayed properly.
+- [x] Verify that normal users cannot access admin reports.
 
 ## 15. Notifications
 
