@@ -1,3 +1,4 @@
+
 const AppError = require('../utils/AppError');
 const offerModel = require('../models/offerModel');
 const notificationService = require('./notificationService');
@@ -17,7 +18,8 @@ async function selectOffer(offerIdValue, buyerIdValue) {
   const buyerId = parsePositiveId(buyerIdValue, 'buyer ID');
 
   return offerModel.withTransaction(async (connection) => {
-    // Find the request associated with this offer.
+
+    // 1. Find the request associated with this offer.
     const initialOffer =
       await offerModel.getOfferRequestId(connection, offerId);
 
@@ -25,7 +27,7 @@ async function selectOffer(offerIdValue, buyerIdValue) {
       throw new AppError('Offer not found.', 404);
     }
 
-    // Lock the request first to serialize selections for it.
+    // 2. Lock the request to prevent simultaneous selections.
     const request =
       await offerModel.getRequestForSelection(
         connection,
@@ -36,6 +38,7 @@ async function selectOffer(offerIdValue, buyerIdValue) {
       throw new AppError('Request not found.', 404);
     }
 
+    // 3. Only the request owner can select a winner.
     if (Number(request.buyer_id) !== buyerId) {
       throw new AppError(
         'Only the request owner can select an offer.',
@@ -43,13 +46,15 @@ async function selectOffer(offerIdValue, buyerIdValue) {
       );
     }
 
+    // 4. Do not allow selection on closed requests.
     if (request.status !== 'open') {
       throw new AppError(
-        'Only open requests can have an offer selected.',
+        'This request is already closed. A winner cannot be selected again.',
         409
       );
     }
 
+    // 5. Check the deadline.
     if (Number(request.is_expired) === 1) {
       throw new AppError(
         'The request deadline has passed.',
@@ -57,6 +62,7 @@ async function selectOffer(offerIdValue, buyerIdValue) {
       );
     }
 
+    // 6. Lock and verify the selected offer.
     const offer =
       await offerModel.getOfferForSelection(
         connection,
@@ -73,6 +79,7 @@ async function selectOffer(offerIdValue, buyerIdValue) {
       );
     }
 
+    // 7. Prevent the buyer from selecting their own offer.
     if (Number(offer.seller_id) === buyerId) {
       throw new AppError(
         'You cannot select your own offer.',
@@ -80,6 +87,7 @@ async function selectOffer(offerIdValue, buyerIdValue) {
       );
     }
 
+    // 8. Create the confirmed deal.
     const dealId = await offerModel.createDeal(connection, {
       requestId: request.id,
       offerId: offer.id,
@@ -88,26 +96,39 @@ async function selectOffer(offerIdValue, buyerIdValue) {
       agreedAmount: offer.offered_price
     });
 
+    // 9. Create pending payment transaction.
     await offerModel.createPendingTransaction(connection, {
       dealId,
       amount: offer.offered_price
     });
-    await offerModel.createHandoverRecord(connection, dealId);
 
-    // Notify the selected seller.
+    // 10. Create handover record.
+    await offerModel.createHandoverRecord(
+      connection,
+      dealId
+    );
+
+    // 11. IMPORTANT: Close the request after winner selection.
+    // This runs inside the same database transaction.
+    await offerModel.closeRequest(
+      connection,
+      request.id
+    );
+
+    // 12. Notify the selected seller.
     await notificationService.createNotification(
       {
         userId: offer.seller_id,
         type: 'deal',
-        message: 'Congratulations! Your offer has been selected by the buyer.',
+        message:
+          'Congratulations! Your offer has been selected by the buyer.',
         referenceType: 'deal',
         referenceId: dealId
       },
       connection
     );
 
-    //await offerModel.closeRequest(connection, request.id);
-
+    // 13. Return the created deal.
     return {
       dealId,
       requestId: request.id,
@@ -115,7 +136,8 @@ async function selectOffer(offerIdValue, buyerIdValue) {
       buyerId,
       sellerId: offer.seller_id,
       agreedAmount: offer.offered_price,
-      status: 'confirmed'
+      status: 'confirmed',
+      requestStatus: 'closed'
     };
   });
 }

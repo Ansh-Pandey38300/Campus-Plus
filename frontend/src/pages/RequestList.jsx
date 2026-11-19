@@ -113,10 +113,21 @@ export default function RequestList() {
     }
   }, []);
 
-  useEffect(() => {
-    loadRequests();
-    loadCategories();
-  }, [loadRequests, loadCategories]);
+// Always open the request listing from the top.
+useEffect(() => {
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: 'instant',
+  });
+}, [location.key]);
+
+// Load requests and categories.
+useEffect(() => {
+  loadRequests();
+  loadCategories();
+}, [loadRequests, loadCategories]);
+
 
   const filteredRequests = useMemo(() => {
     const query = search.trim().toLowerCase();
