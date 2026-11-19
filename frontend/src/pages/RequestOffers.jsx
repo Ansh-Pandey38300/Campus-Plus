@@ -228,8 +228,14 @@ export default function RequestOffers() {
     try {
       const response = await selectOffer(offer.id);
 
-      const deal = response?.deal;
-      const dealId = deal?.dealId;
+const deal = response?.deal;
+const dealId = deal?.dealId;
+
+// Update the request status immediately.
+setRequestInfo((previous) => ({
+  ...previous,
+  status: 'closed',
+}));
 
       if (dealId) {
         success('Winner selected successfully!');
